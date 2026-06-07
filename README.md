@@ -11,10 +11,17 @@ Abre `index.html` directamente en el navegador. No requiere backend, base de dat
 Las asignaciones se controlan en `data.js`.
 
 - `countries` contiene los 48 paises en orden.
-- `participants` contiene los 48 participantes en el mismo orden.
-- El participante en la posicion 1 recibe el pais en la posicion 1, el participante en la posicion 2 recibe el pais en la posicion 2, y asi sucesivamente.
+- `assignments` contiene la relacion editable entre participante y pais.
+- Cada asignacion usa `participantName` y `teamCode`.
+- Un participante puede aparecer varias veces si tiene varios paises.
 
-Para cambiar una asignacion, edita el nombre dentro de `participants` manteniendo el mismo numero de elementos.
+Para cambiar el sorteo, edita solamente `assignments`. Ejemplo:
+
+```js
+{ participantName: "Carlos Escobar", teamCode: "MEX" }
+```
+
+Si un pais no aparece en `assignments`, el portal mostrara `Sin asignar`.
 
 ## Editar partidos
 

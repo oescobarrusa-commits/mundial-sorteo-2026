@@ -652,11 +652,9 @@
   <script>
     const data = WORLD_CUP_DATA;
     const teams = new Map(data.countries.map((item) => [item.code, item]));
-    const tickets = data.countries.map((country, index) => ({
-      participantName: data.participants[index],
-      teamCode: country.code
-    }));
-    const uniqueParticipants = [...new Set(tickets.map((ticket) => ticket.participantName))]
+    const assignments = data.assignments || [];
+    const assignmentByTeam = new Map(assignments.map((assignment) => [assignment.teamCode, assignment]));
+    const uniqueParticipants = [...new Set(assignments.map((assignment) => assignment.participantName))]
       .sort((a, b) => a.localeCompare(b, "es"));
 
     let selectedCountryCode = data.countries[0].code;
@@ -666,8 +664,8 @@
     }
 
     function getOwnerByTeam(code) {
-      const ticket = tickets.find((item) => item.teamCode === code);
-      return ticket ? ticket.participantName : "Sin asignar";
+      const assignment = assignmentByTeam.get(code);
+      return assignment ? assignment.participantName : "Sin asignar";
     }
 
     function getMatchesForTeam(code) {
@@ -698,16 +696,16 @@
 
     function renderParticipantDetail() {
       const name = document.getElementById("participantSelect").value;
-      const ownedTickets = tickets.filter((ticket) => ticket.participantName === name);
-      const countryLabel = ownedTickets.length === 1 ? "país asignado" : "países asignados";
+      const ownedAssignments = assignments.filter((assignment) => assignment.participantName === name);
+      const countryLabel = ownedAssignments.length === 1 ? "país asignado" : "países asignados";
 
       document.getElementById("participantHeadline").textContent = name;
       document.getElementById("participantSummary").textContent =
-        `${name} tiene ${ownedTickets.length} ${countryLabel}.`;
+        `${name} tiene ${ownedAssignments.length} ${countryLabel}.`;
 
-      document.getElementById("participantAssignments").innerHTML = ownedTickets.map((ticket) => {
-        const team = getTeam(ticket.teamCode);
-        const teamMatches = getMatchesForTeam(ticket.teamCode);
+      document.getElementById("participantAssignments").innerHTML = ownedAssignments.map((assignment) => {
+        const team = getTeam(assignment.teamCode);
+        const teamMatches = getMatchesForTeam(assignment.teamCode);
 
         return `
           <article class="assignment-card">
@@ -722,7 +720,7 @@
             <h4 class="matches-title">Partidos de fase de grupos</h4>
             <div class="match-list">
               ${teamMatches.map((match) => {
-                const opponentCode = getOpponent(match, ticket.teamCode);
+                const opponentCode = getOpponent(match, assignment.teamCode);
                 const opponent = getTeam(opponentCode);
                 const opponentOwner = getOwnerByTeam(opponentCode);
                 return `
