@@ -50,18 +50,18 @@ const WORLD_CUP_DATA = {
     { code: "PAN", name: "Panama", displayName: "Panamá", flag: "🇵🇦", group: "L" }
   ],
   participants: [
-    "Carlos Escobar", "Juan Escobar Zaldivar", "Carlos Escobar", "Roberto Escobar Rico",
-    "Carlos Escobar", "Valente Escobar Flores", "Carlos Escobar", "Fernanda Lopez Morales",
-    "Carlos Escobar", "Lorenzo Escobar Lopez", "Carlos Escobar", "Valentina Escobar Lopez",
-    "Carlos Escobar", "Joel Ramirez Escobar", "Carlos Escobar", "Lorenzo Escobar Zaldivar",
-    "Carlos Escobar", "Julio Escobar Vega", "Carlos Escobar", "Alejandro Escobar Jr",
-    "Carlos Escobar", "Genoveva Garcia", "Carlos Escobar", "Alejandra Villarreal",
-    "Ricardo Escobar Flores", "Nicole Escobar", "Claudia Romero Perez", "Manuel Escobar",
-    "Ricardo Escobar Romero", "Santiago Escobar", "Claudio Escobar Romero", "Memo Escobar",
-    "Pollopug Escobar", "Haakon Escobar", "Mundialito TV", "Samantha Escobar",
-    "Yazmin Romero", "Ricardo Valente Escobar", "Riclaud Escobar", "Blanca Aguirre",
-    "Aaron Escobar", "Luis Escobar Lopez", "Jorge Escobar", "Gabriela Lopez Flores",
-    "Regina Escobar", "Matias Villegas", "Ximena Escobar", "Aislinn Villagran Villegas"
+    "Carlos Escobar 1", "Carlos Escobar 2", "Carlos Escobar 3", "Carlos Escobar 4",
+    "Carlos Escobar 5", "Carlos Escobar 6", "Carlos Escobar 7", "Carlos Escobar 8",
+    "Carlos Escobar 9", "Carlos Escobar 10", "Carlos Escobar 11", "Carlos Escobar 12",
+    "Ricardo Escobar Flores", "Claudia Romero Perez", "Ricardo Escobar Romero", "Claudio Escobar Romero",
+    "Pollopug Escobar", "Mundialito TV", "Yazmin Romero", "Riclaud Escobar",
+    "Aaron Escobar", "Jorge Escobar", "Regina Escobar", "Ximena Escobar",
+    "Juan Escobar Zaldivar", "Roberto Escobar Rico", "Valente Escobar Flores", "Fernanda Lopez Morales",
+    "Lorenzo Escobar Lopez", "Valentina Escobar Lopez", "Joel Ramirez Escobar", "Lorenzo Escobar Zaldivar",
+    "Julio Escobar Vega", "Alejandro Escobar Jr", "Genoveva Garcia", "Alejandra Villarreal",
+    "Nicole Escobar", "Manuel Escobar", "Santiago Escobar", "Memo Escobar",
+    "Haakon Escobar", "Samantha Escobar", "Ricardo Valente Escobar", "Blanca Aguirre",
+    "Luis Escobar Lopez", "Gabriela Lopez Flores", "Matias Villegas", "Aislinn Villagran Villegas"
   ],
   // Para cambiar el sorteo sin tocar codigo, publica un Google Sheet como CSV
   // y pega aqui la URL. La hoja solo necesita dos columnas: name, teamCode.

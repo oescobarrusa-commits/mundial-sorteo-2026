@@ -26,7 +26,8 @@ Detalles:
 
 - `name` es el nombre del participante.
 - `teamCode` es el codigo del pais, por ejemplo `MEX`, `ARG`, `POR`.
-- Un participante puede aparecer varias veces si tiene varios paises.
+- Cada participante aparece una sola vez.
+- Cada participante tiene maximo un pais asignado.
 - Un pais solo puede tener una asignacion.
 - Si la hoja esta vacia, el portal mostrara los paises como `Sin asignar`.
 

@@ -700,12 +700,12 @@
         <aside class="panel">
           <label for="participantSelect">Buscar por participante</label>
           <select id="participantSelect"></select>
-          <p class="note">Si una persona tiene más de una participación, aparecerá una sola vez en el filtro, pero verá todos sus países asignados.</p>
+          <p class="note">Cada participante aparece una sola vez. Cuando el sorteo esté listo, aquí verá su país asignado.</p>
         </aside>
         <div>
           <div class="headline-card">
             <h2 id="participantHeadline">Participante</h2>
-            <p id="participantSummary">Selecciona un participante para ver sus países y sus rivales de fase de grupos.</p>
+            <p id="participantSummary">Selecciona un participante para ver su país y sus rivales de fase de grupos.</p>
           </div>
           <div id="participantAssignments" class="country-assignment-grid"></div>
         </div>
@@ -772,7 +772,7 @@
         .map((assignment) => [assignment.teamCode, assignment]));
       assignments = [...uniqueAssignmentsByTeam.values()];
       assignmentByTeam = new Map(assignments.map((assignment) => [assignment.teamCode, assignment]));
-      uniqueParticipants = [...new Set((assignments.length ? assignments : data.participants || [])
+      uniqueParticipants = [...new Set([...(data.participants || []), ...assignments]
         .map((item) => typeof item === "string" ? item : item.participantName)
         .filter(Boolean))]
         .sort((a, b) => a.localeCompare(b, "es"));
@@ -824,12 +824,14 @@
     function renderParticipantDetail() {
       const name = document.getElementById("participantSelect").value;
       const ownedAssignments = assignments.filter((assignment) => assignment.participantName === name);
-      const countryLabel = ownedAssignments.length === 1 ? "país asignado" : "países asignados";
+      const assignedCountryText = ownedAssignments.length
+        ? `${name} tiene 1 país asignado.`
+        : `${name} todavía no tiene país asignado.`;
 
       document.getElementById("participantHeadline").textContent = name || "Participantes";
       document.getElementById("participantSummary").textContent =
         name
-          ? `${name} tiene ${ownedAssignments.length} ${countryLabel}.`
+          ? assignedCountryText
           : "Todavía no hay participantes cargados.";
 
       if (!ownedAssignments.length) {
@@ -838,7 +840,7 @@
             <div class="assignment-top">
               <div class="flag">?</div>
               <div>
-                <h3>Sin países asignados</h3>
+                <h3>Sin país asignado</h3>
                 <p>Cuando el sorteo esté listo, agrega filas en Google Sheets con name y teamCode.</p>
               </div>
             </div>
@@ -1040,29 +1042,35 @@
         const response = await fetch(data.googleSheetCsvUrl, { cache: "no-store" });
         if (!response.ok) throw new Error("No se pudo leer Google Sheets");
         const csv = await response.text();
-        const sheetAssignments = parseAssignmentsCsv(csv);
+        const sheetData = parseSheetData(csv);
         data = {
           ...data,
-          assignments: sheetAssignments
+          participants: sheetData.participants,
+          assignments: sheetData.assignments
         };
       } catch (error) {
         console.warn("Usando assignments locales porque Google Sheets no cargo.", error);
       }
     }
 
-    function parseAssignmentsCsv(csv) {
+    function parseSheetData(csv) {
       const rows = parseCsvRows(csv).filter((row) => row.some((cell) => cell.trim()));
-      if (rows.length < 2) return [];
+      if (rows.length < 2) return { participants: [], assignments: [] };
 
       const headers = rows[0].map((header) => normalizeHeader(header));
       const nameIndex = findHeaderIndex(headers, ["name", "participantname", "participant"]);
       const teamCodeIndex = findHeaderIndex(headers, ["teamcode", "code", "countrycode"]);
-      if (nameIndex === -1 || teamCodeIndex === -1) return [];
+      if (nameIndex === -1 || teamCodeIndex === -1) return { participants: [], assignments: [] };
 
-      return rows.slice(1).map((row) => ({
+      const parsedRows = rows.slice(1).map((row) => ({
         participantName: (row[nameIndex] || "").trim(),
         teamCode: (row[teamCodeIndex] || "").trim().toUpperCase()
-      })).filter((assignment) => assignment.participantName && assignment.teamCode);
+      })).filter((row) => row.participantName);
+
+      return {
+        participants: [...new Set(parsedRows.map((row) => row.participantName))],
+        assignments: parsedRows.filter((row) => row.teamCode)
+      };
     }
 
     function parseCsvRows(csv) {
