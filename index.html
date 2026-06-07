@@ -7,14 +7,15 @@
   <script src="data.js"></script>
   <style>
     :root {
-      --bg: #06101f;
-      --panel: #101f35;
-      --text: #ffffff;
-      --muted: #aebbd0;
-      --gold: #f7c948;
-      --blue: #58a6ff;
-      --border: rgba(255, 255, 255, 0.12);
-      --shadow: 0 22px 50px rgba(0, 0, 0, 0.32);
+      --bg: #eaf0fa;
+      --panel: #ffffff;
+      --text: #071733;
+      --muted: #52627c;
+      --gold: #0078ff;
+      --blue: #005b99;
+      --border: #d8e0ec;
+      --shadow: 0 12px 28px rgba(7, 23, 51, 0.08);
+      --surface: #f7f9fd;
     }
 
     * {
@@ -26,10 +27,7 @@
       min-height: 100vh;
       color: var(--text);
       font-family: Arial, Helvetica, sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(88, 166, 255, 0.23), transparent 34%),
-        radial-gradient(circle at bottom right, rgba(247, 201, 72, 0.18), transparent 34%),
-        var(--bg);
+      background: var(--bg);
     }
 
     button,
@@ -41,18 +39,19 @@
       position: sticky;
       top: 0;
       z-index: 10;
-      padding: 26px 34px 18px;
-      border-bottom: 1px solid var(--border);
-      background: rgba(6, 16, 31, 0.82);
-      backdrop-filter: blur(14px);
+      padding: 0 34px;
+      border-bottom: 0;
+      background: #005b99;
+      box-shadow: 0 4px 14px rgba(7, 23, 51, 0.14);
     }
 
     .topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 20px;
+      gap: 28px;
       flex-wrap: wrap;
+      min-height: 58px;
     }
 
     h1,
@@ -64,43 +63,46 @@
     }
 
     h1 {
-      margin-bottom: 6px;
-      font-size: clamp(28px, 4vw, 44px);
+      margin-bottom: 0;
+      color: #fff;
+      font-size: clamp(24px, 3vw, 34px);
       letter-spacing: 0;
     }
 
     .subtitle {
-      color: var(--muted);
+      display: none;
       line-height: 1.45;
     }
 
     .tabs {
       display: flex;
-      gap: 8px;
+      gap: 4px;
       flex-wrap: wrap;
-      padding: 6px;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.06);
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
     }
 
     .tab {
       border: 0;
-      border-radius: 999px;
-      padding: 12px 16px;
+      border-radius: 0;
+      padding: 20px 14px;
       background: transparent;
-      color: var(--text);
+      color: rgba(255, 255, 255, 0.86);
       cursor: pointer;
       font-weight: 800;
+      text-transform: uppercase;
     }
 
+    .tab:hover,
     .tab.active {
-      background: var(--gold);
-      color: #151515;
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
     }
 
     main {
-      padding: 28px 34px 50px;
+      padding: 30px 34px 50px;
     }
 
     .screen {
@@ -126,8 +128,8 @@
     .completed-bracket,
     .draw-panel {
       border: 1px solid var(--border);
-      border-radius: 28px;
-      background: rgba(16, 31, 53, 0.92);
+      border-radius: 10px;
+      background: var(--panel);
       box-shadow: var(--shadow);
     }
 
@@ -149,8 +151,8 @@
       width: 100%;
       padding: 14px 16px;
       border: 1px solid var(--border);
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      background: #fff;
       color: var(--text);
       font-size: 16px;
       outline: none;
@@ -169,7 +171,8 @@
     .headline-card {
       margin-bottom: 18px;
       padding: 26px;
-      background: linear-gradient(145deg, rgba(88, 166, 255, 0.22), rgba(16, 31, 53, 0.95));
+      border-left: 4px solid var(--gold);
+      background: var(--panel);
     }
 
     .headline-card h2 {
@@ -189,7 +192,7 @@
 
     .assignment-card {
       padding: 24px;
-      border-radius: 30px;
+      border-radius: 10px;
     }
 
     .assignment-top {
@@ -209,8 +212,8 @@
       width: 86px;
       height: 86px;
       border: 1px solid var(--border);
-      border-radius: 24px;
-      background: rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      background: var(--surface);
       font-size: 64px;
       line-height: 1;
     }
@@ -241,8 +244,8 @@
       align-items: center;
       padding: 16px;
       border: 1px solid var(--border);
-      border-radius: 20px;
-      background: rgba(255, 255, 255, 0.045);
+      border-radius: 8px;
+      background: var(--surface);
     }
 
     .match-date {
@@ -274,7 +277,8 @@
     .countries-header {
       margin-bottom: 22px;
       padding: 24px;
-      background: rgba(16, 31, 53, 0.84);
+      border-left: 4px solid var(--gold);
+      background: var(--panel);
     }
 
     .countries-header h2,
@@ -302,20 +306,20 @@
       min-height: 135px;
       padding: 18px;
       border: 1px solid var(--border);
-      border-radius: 22px;
-      background: rgba(16, 31, 53, 0.9);
-      color: #fff;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
       cursor: pointer;
       text-align: center;
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+      box-shadow: var(--shadow);
       transition: 0.2s ease;
     }
 
     .country-tile:hover,
     .country-tile.active {
       transform: translateY(-3px);
-      border-color: rgba(247, 201, 72, 0.75);
-      background: rgba(247, 201, 72, 0.08);
+      border-color: var(--gold);
+      background: #f7fbff;
     }
 
     .tile-flag {
@@ -325,13 +329,13 @@
     }
 
     .tile-name {
-      color: #fff;
+      color: var(--text);
       font-weight: 900;
     }
 
     .country-detail {
       padding: 24px;
-      border-radius: 30px;
+      border-radius: 10px;
     }
 
     .country-detail-grid {
@@ -343,8 +347,8 @@
     .detail-main {
       padding: 22px;
       border: 1px solid var(--border);
-      border-radius: 24px;
-      background: rgba(255, 255, 255, 0.045);
+      border-radius: 8px;
+      background: var(--surface);
       text-align: center;
     }
 
@@ -367,9 +371,9 @@
     .owner-box {
       margin-top: 16px;
       padding: 16px;
-      border: 1px solid rgba(247, 201, 72, 0.3);
-      border-radius: 20px;
-      background: rgba(247, 201, 72, 0.12);
+      border: 1px solid rgba(0, 120, 255, 0.24);
+      border-radius: 8px;
+      background: rgba(0, 120, 255, 0.08);
       text-align: left;
     }
 
@@ -389,7 +393,7 @@
     .completed-bracket {
       overflow-x: auto;
       padding: 28px;
-      border-radius: 30px;
+      border-radius: 10px;
     }
 
     .completed-bracket-intro {
@@ -404,8 +408,8 @@
     .bracket-round {
       overflow: hidden;
       border: 1px solid var(--border);
-      border-radius: 22px;
-      background: rgba(255, 255, 255, 0.045);
+      border-radius: 8px;
+      background: #fff;
     }
 
     .bracket-round-title {
@@ -433,9 +437,9 @@
       place-items: center;
       width: 32px;
       height: 32px;
-      border: 1px solid rgba(247, 201, 72, 0.35);
+      border: 1px solid rgba(0, 120, 255, 0.28);
       border-radius: 50%;
-      color: #151515;
+      color: #fff;
       background: var(--gold);
       font-size: 20px;
       line-height: 1;
@@ -462,8 +466,8 @@
     .bracket-match {
       overflow: hidden;
       border: 1px solid var(--border);
-      border-radius: 22px;
-      background: rgba(255, 255, 255, 0.045);
+      border-radius: 8px;
+      background: #fff;
     }
 
     .bracket-match-header {
@@ -472,7 +476,7 @@
       gap: 10px;
       padding: 10px 12px;
       border-bottom: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.045);
+      background: var(--surface);
       color: var(--muted);
       font-size: 12px;
       font-weight: 800;
@@ -483,7 +487,7 @@
       grid-template-columns: 1fr auto;
       gap: 10px;
       padding: 13px 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid var(--border);
     }
 
     .bracket-team:last-child {
@@ -492,12 +496,12 @@
 
     .bracket-team.winner {
       border-left: 4px solid var(--gold);
-      background: linear-gradient(90deg, rgba(247, 201, 72, 0.14), transparent);
+      background: linear-gradient(90deg, rgba(0, 120, 255, 0.1), transparent);
     }
 
     .bracket-country {
       margin-bottom: 5px;
-      color: #fff;
+      color: var(--text);
       font-weight: 900;
     }
 
@@ -508,7 +512,7 @@
     }
 
     .bracket-score {
-      color: #fff;
+      color: var(--text);
       font-size: 24px;
       font-weight: 900;
     }
@@ -519,9 +523,9 @@
       justify-content: center;
       min-height: 240px;
       padding: 24px;
-      border: 1px solid rgba(247, 201, 72, 0.45);
-      border-radius: 26px;
-      background: linear-gradient(145deg, rgba(247, 201, 72, 0.25), rgba(16, 31, 53, 0.95));
+      border: 1px solid rgba(0, 120, 255, 0.28);
+      border-radius: 8px;
+      background: #f7fbff;
       text-align: center;
     }
 
@@ -544,8 +548,9 @@
 
     .draw-panel {
       padding: 28px;
-      border-radius: 30px;
-      background: linear-gradient(145deg, rgba(88, 166, 255, 0.16), rgba(16, 31, 53, 0.94));
+      border-radius: 10px;
+      border-left: 4px solid var(--gold);
+      background: var(--panel);
     }
 
     .video-frame {
@@ -553,8 +558,8 @@
       width: 100%;
       margin-top: 24px;
       border: 1px solid var(--border);
-      border-radius: 24px;
-      background: rgba(0, 0, 0, 0.24);
+      border-radius: 8px;
+      background: #071733;
       aspect-ratio: 16 / 9;
       box-shadow: var(--shadow);
     }
@@ -581,14 +586,14 @@
       justify-content: center;
       padding: 16px 42px 18px 18px;
       border-top: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(6, 16, 31, 0.62);
+      background: #071733;
     }
 
     .footer-attribution {
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      color: rgba(174, 187, 208, 0.72);
+      color: rgba(234, 240, 250, 0.72);
       text-align: left;
     }
 
@@ -612,7 +617,7 @@
     }
 
     .footer-attribution__text p:first-child {
-      color: rgba(247, 201, 72, 0.78);
+      color: rgba(255, 255, 255, 0.92);
       font-weight: 700;
     }
 
