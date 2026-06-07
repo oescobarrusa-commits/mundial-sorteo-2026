@@ -182,5 +182,6 @@ const WORLD_CUP_DATA = {
       ] }
     ],
     champion: "ARG"
-  }
+  },
+  drawVideoUrl: "https://www.youtube.com/embed/VIDEO_ID_AQUI"
 };

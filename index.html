@@ -3,21 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Portal Sorteo Mundial 2026</title>
+  <title>Sorteo Mundial 2026</title>
   <script src="data.js"></script>
   <style>
     :root {
-      --bg: #07152f;
-      --bg-2: #0b2145;
-      --panel: rgba(13, 35, 72, 0.9);
-      --panel-2: rgba(10, 29, 61, 0.96);
-      --gold: #d7b46a;
-      --gold-2: #f2d487;
-      --text: #f7f9ff;
-      --muted: #b6c4de;
-      --line: rgba(215, 180, 106, 0.24);
-      --shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
-      --radius: 18px;
+      --bg: #06101f;
+      --panel: #101f35;
+      --text: #ffffff;
+      --muted: #aebbd0;
+      --gold: #f7c948;
+      --blue: #58a6ff;
+      --border: rgba(255, 255, 255, 0.12);
+      --shadow: 0 22px 50px rgba(0, 0, 0, 0.32);
     }
 
     * {
@@ -27,12 +24,12 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background:
-        radial-gradient(circle at 15% 5%, rgba(215, 180, 106, 0.13), transparent 26rem),
-        linear-gradient(145deg, #061126 0%, #071a39 46%, #061126 100%);
       color: var(--text);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      line-height: 1.5;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(88, 166, 255, 0.23), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(247, 201, 72, 0.18), transparent 34%),
+        var(--bg);
     }
 
     button,
@@ -40,663 +37,842 @@
       font: inherit;
     }
 
-    .app {
-      width: min(1180px, calc(100% - 32px));
-      margin: 0 auto;
-      padding: 28px 0 44px;
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      padding: 26px 34px 18px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(6, 16, 31, 0.82);
+      backdrop-filter: blur(14px);
     }
 
-    .hero {
-      display: grid;
-      gap: 18px;
-      padding: 26px 0 20px;
-    }
-
-    .eyebrow {
-      color: var(--gold-2);
-      font-size: 0.78rem;
-      font-weight: 800;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
     }
 
     h1,
     h2,
     h3,
+    h4,
     p {
       margin: 0;
     }
 
     h1 {
-      max-width: 820px;
-      font-size: clamp(2.25rem, 5vw, 4.75rem);
-      line-height: 0.95;
+      margin-bottom: 6px;
+      font-size: clamp(28px, 4vw, 44px);
       letter-spacing: 0;
     }
 
-    .hero p {
-      max-width: 720px;
+    .subtitle {
       color: var(--muted);
-      font-size: 1.05rem;
+      line-height: 1.45;
     }
 
     .tabs {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      display: flex;
       gap: 8px;
-      padding: 10px;
-      margin: 16px 0 24px;
-      border: 1px solid var(--line);
+      flex-wrap: wrap;
+      padding: 6px;
+      border: 1px solid var(--border);
       border-radius: 999px;
-      background: rgba(5, 16, 35, 0.78);
-      backdrop-filter: blur(14px);
-      box-shadow: var(--shadow);
+      background: rgba(255, 255, 255, 0.06);
     }
 
     .tab {
-      min-height: 44px;
       border: 0;
       border-radius: 999px;
+      padding: 12px 16px;
       background: transparent;
-      color: var(--muted);
+      color: var(--text);
       cursor: pointer;
       font-weight: 800;
-      transition: 180ms ease;
     }
 
     .tab.active {
-      background: linear-gradient(135deg, var(--gold-2), var(--gold));
-      color: #15213c;
-      box-shadow: 0 10px 24px rgba(215, 180, 106, 0.22);
+      background: var(--gold);
+      color: #151515;
     }
 
-    .view {
+    main {
+      padding: 28px 34px 50px;
+    }
+
+    .screen {
       display: none;
     }
 
-    .view.active {
-      display: grid;
-      gap: 22px;
+    .screen.active {
+      display: block;
     }
 
-    .panel {
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+    .participant-layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .panel,
+    .headline-card,
+    .assignment-card,
+    .countries-header,
+    .country-detail,
+    .completed-bracket,
+    .draw-panel {
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      background: rgba(16, 31, 53, 0.92);
       box-shadow: var(--shadow);
     }
 
-    .toolbar {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 18px;
-      align-items: end;
-      padding: 22px;
-    }
-
-    .field {
-      display: grid;
-      gap: 8px;
+    .panel {
+      padding: 24px;
     }
 
     label {
-      color: var(--gold-2);
-      font-size: 0.84rem;
-      font-weight: 800;
+      display: block;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.8px;
       text-transform: uppercase;
     }
 
     select {
       width: 100%;
-      min-height: 48px;
-      padding: 0 16px;
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 12px;
-      background: #091934;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.08);
       color: var(--text);
+      font-size: 16px;
       outline: none;
     }
 
-    .stat {
-      min-width: 148px;
-      padding: 14px 16px;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.04);
-      text-align: right;
+    option {
+      color: #111;
     }
 
-    .stat strong {
-      display: block;
-      color: var(--gold-2);
-      font-size: 1.6rem;
-      line-height: 1;
-    }
-
-    .stat span {
+    .note {
+      margin-top: 18px;
       color: var(--muted);
-      font-size: 0.82rem;
+      line-height: 1.55;
     }
 
-    .assignments,
-    .country-detail,
-    .bracket-wrap {
+    .headline-card {
+      margin-bottom: 18px;
+      padding: 26px;
+      background: linear-gradient(145deg, rgba(88, 166, 255, 0.22), rgba(16, 31, 53, 0.95));
+    }
+
+    .headline-card h2 {
+      margin-bottom: 8px;
+      font-size: clamp(28px, 4vw, 42px);
+    }
+
+    .headline-card p {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .country-assignment-grid {
       display: grid;
       gap: 18px;
     }
 
-    .country-card-full,
-    .country-detail-card {
-      overflow: hidden;
+    .assignment-card {
+      padding: 24px;
+      border-radius: 30px;
     }
 
-    .country-head {
+    .assignment-top {
       display: grid;
       grid-template-columns: auto 1fr;
-      gap: 16px;
+      gap: 18px;
       align-items: center;
-      padding: 20px;
-      border-bottom: 1px solid var(--line);
+      margin-bottom: 18px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border);
     }
 
     .flag {
-      display: grid;
-      place-items: center;
-      width: 58px;
-      height: 58px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.08);
-      font-size: 2rem;
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-    }
-
-    .country-head h2,
-    .country-head h3 {
-      font-size: 1.35rem;
-    }
-
-    .meta {
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 8px;
+      align-items: center;
+      justify-content: center;
+      width: 86px;
+      height: 86px;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.06);
+      font-size: 64px;
+      line-height: 1;
+    }
+
+    .assignment-top h3 {
+      margin-bottom: 6px;
+      font-size: 30px;
+    }
+
+    .assignment-top p {
       color: var(--muted);
     }
 
-    .pill {
-      padding: 5px 10px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.04);
-      font-size: 0.84rem;
+    .matches-title {
+      margin-bottom: 14px;
+      font-size: 19px;
     }
 
-    .matches {
+    .match-list {
       display: grid;
       gap: 12px;
-      padding: 18px;
     }
 
     .match-card {
       display: grid;
-      gap: 12px;
+      grid-template-columns: 150px 1fr;
+      gap: 16px;
+      align-items: center;
       padding: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 14px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
       background: rgba(255, 255, 255, 0.045);
     }
 
-    .match-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      color: var(--gold-2);
+    .match-date {
+      color: var(--blue);
       font-weight: 900;
+      line-height: 1.35;
     }
 
-    .opponent {
-      font-size: 1.05rem;
-      font-weight: 850;
+    .match-main strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 17px;
+    }
+
+    .match-main span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
     }
 
     .rival-owner {
-      padding: 10px 12px;
-      border-left: 3px solid var(--gold-2);
-      border-radius: 10px;
-      background: rgba(215, 180, 106, 0.12);
-      color: #fff4d5;
-      font-size: 1.15rem;
-      font-weight: 900;
+      margin: 6px 0;
+      color: var(--gold) !important;
+      font-size: 20px !important;
+      font-weight: 900 !important;
     }
 
-    .match-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
+    .countries-header {
+      margin-bottom: 22px;
+      padding: 24px;
+      background: rgba(16, 31, 53, 0.84);
+    }
+
+    .countries-header h2,
+    .completed-bracket h2,
+    .draw-panel h2 {
+      margin-bottom: 7px;
+      font-size: clamp(28px, 3vw, 40px);
+    }
+
+    .countries-header p,
+    .completed-bracket-intro,
+    .draw-panel p {
       color: var(--muted);
-      font-size: 0.92rem;
+      line-height: 1.5;
     }
 
     .countries-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
     }
 
     .country-tile {
-      min-height: 138px;
-      display: grid;
-      place-items: center;
-      gap: 8px;
-      padding: 16px 12px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text);
+      min-height: 135px;
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background: rgba(16, 31, 53, 0.9);
+      color: #fff;
       cursor: pointer;
       text-align: center;
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16);
-      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+      transition: 0.2s ease;
     }
 
     .country-tile:hover,
     .country-tile.active {
-      transform: translateY(-2px);
-      border-color: rgba(242, 212, 135, 0.72);
-      background: rgba(215, 180, 106, 0.13);
+      transform: translateY(-3px);
+      border-color: rgba(247, 201, 72, 0.75);
+      background: rgba(247, 201, 72, 0.08);
     }
 
-    .country-tile .flag {
-      width: 54px;
-      height: 54px;
+    .tile-flag {
+      margin-bottom: 12px;
+      font-size: 50px;
+      line-height: 1;
     }
 
-    .country-tile strong {
-      line-height: 1.15;
+    .tile-name {
+      color: #fff;
+      font-weight: 900;
     }
 
-    .section-title {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      padding: 20px 20px 0;
+    .country-detail {
+      padding: 24px;
+      border-radius: 30px;
     }
 
-    .section-title h2 {
-      font-size: 1.25rem;
-    }
-
-    .section-title span {
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    .bracket {
+    .country-detail-grid {
       display: grid;
-      grid-template-columns: repeat(5, minmax(220px, 1fr));
-      gap: 16px;
-      overflow-x: auto;
-      padding: 20px;
+      grid-template-columns: 0.8fr 1.2fr;
+      gap: 18px;
     }
 
-    .round {
+    .detail-main {
+      padding: 22px;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.045);
+      text-align: center;
+    }
+
+    .large-flag {
+      display: block;
+      margin-bottom: 12px;
+      font-size: 86px;
+    }
+
+    .detail-main h2 {
+      margin-bottom: 8px;
+      font-size: 34px;
+    }
+
+    .detail-main p {
+      margin: 6px 0;
+      color: var(--muted);
+    }
+
+    .owner-box {
+      margin-top: 16px;
+      padding: 16px;
+      border: 1px solid rgba(247, 201, 72, 0.3);
+      border-radius: 20px;
+      background: rgba(247, 201, 72, 0.12);
+      text-align: left;
+    }
+
+    .owner-box small {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-weight: 900;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
+    }
+
+    .owner-box strong {
+      font-size: 24px;
+    }
+
+    .completed-bracket {
+      overflow-x: auto;
+      padding: 28px;
+      border-radius: 30px;
+    }
+
+    .completed-bracket-intro {
+      margin-bottom: 24px;
+    }
+
+    .bracket-board {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(260px, 1fr));
+      gap: 18px;
+      min-width: 1380px;
+      align-items: start;
+    }
+
+    .bracket-round {
       display: grid;
       align-content: start;
-      gap: 12px;
-      min-width: 220px;
+      gap: 16px;
     }
 
-    .round h2 {
-      color: var(--gold-2);
-      font-size: 1rem;
+    .bracket-round-title {
+      margin-bottom: 4px;
+      color: var(--gold);
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 0.9px;
       text-transform: uppercase;
     }
 
     .bracket-match {
-      display: grid;
-      gap: 8px;
-      padding: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.045);
     }
 
-    .team-row {
+    .bracket-match-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.045);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .bracket-team {
       display: grid;
       grid-template-columns: 1fr auto;
       gap: 10px;
-      align-items: center;
-      padding: 9px;
-      border-radius: 10px;
-      color: var(--muted);
+      padding: 13px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .team-row.winner {
-      background: rgba(215, 180, 106, 0.16);
-      color: var(--text);
-      box-shadow: inset 0 0 0 1px rgba(215, 180, 106, 0.28);
+    .bracket-team:last-child {
+      border-bottom: 0;
     }
 
-    .team-name {
+    .bracket-team.winner {
+      border-left: 4px solid var(--gold);
+      background: linear-gradient(90deg, rgba(247, 201, 72, 0.14), transparent);
+    }
+
+    .bracket-country {
+      margin-bottom: 5px;
+      color: #fff;
       font-weight: 900;
     }
 
-    .team-owner {
-      display: block;
-      margin-top: 2px;
-      color: inherit;
-      font-size: 0.78rem;
-      opacity: 0.82;
-    }
-
-    .score {
-      min-width: 28px;
-      color: var(--gold-2);
-      font-size: 1.2rem;
-      font-weight: 950;
-      text-align: right;
-    }
-
-    .champion {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 16px;
-      align-items: center;
-      padding: 22px;
-      border-top: 1px solid var(--line);
-      background: linear-gradient(135deg, rgba(215, 180, 106, 0.16), rgba(255, 255, 255, 0.04));
-    }
-
-    .champion h2 {
-      font-size: 1.55rem;
-    }
-
-    .empty {
-      padding: 24px;
+    .bracket-owner {
       color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
     }
 
-    @media (max-width: 720px) {
-      .app {
-        width: min(100% - 22px, 1180px);
-        padding-top: 16px;
-      }
+    .bracket-score {
+      color: #fff;
+      font-size: 24px;
+      font-weight: 900;
+    }
 
-      .hero {
-        padding-top: 16px;
+    .champion-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 240px;
+      padding: 24px;
+      border: 1px solid rgba(247, 201, 72, 0.45);
+      border-radius: 26px;
+      background: linear-gradient(145deg, rgba(247, 201, 72, 0.25), rgba(16, 31, 53, 0.95));
+      text-align: center;
+    }
+
+    .champion-trophy {
+      margin-bottom: 12px;
+      font-size: 64px;
+      line-height: 1;
+    }
+
+    .champion-panel h3 {
+      margin-bottom: 8px;
+      font-size: 32px;
+    }
+
+    .champion-panel p {
+      margin: 4px 0;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .draw-panel {
+      padding: 28px;
+      border-radius: 30px;
+      background: linear-gradient(145deg, rgba(88, 166, 255, 0.16), rgba(16, 31, 53, 0.94));
+    }
+
+    .video-frame {
+      overflow: hidden;
+      width: 100%;
+      margin-top: 24px;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: rgba(0, 0, 0, 0.24);
+      aspect-ratio: 16 / 9;
+      box-shadow: var(--shadow);
+    }
+
+    .video-frame iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+
+    .footer-note {
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    @media (max-width: 1000px) {
+      .participant-layout,
+      .country-detail-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 620px) {
+      header,
+      main {
+        padding-right: 18px;
+        padding-left: 18px;
       }
 
       .tabs {
-        gap: 6px;
-        padding: 7px;
-        border-radius: 18px;
+        width: 100%;
+        border-radius: 24px;
       }
 
       .tab {
-        min-height: 42px;
-        padding: 0 8px;
-        font-size: 0.88rem;
+        flex: 1 1 calc(50% - 8px);
       }
 
-      .toolbar,
-      .match-grid,
-      .champion {
+      .assignment-top {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .flag {
+        margin: 0 auto;
+      }
+
+      .match-card {
         grid-template-columns: 1fr;
       }
 
-      .stat {
-        text-align: left;
+      .rival-owner {
+        font-size: 18px !important;
       }
 
-      .country-head {
-        grid-template-columns: 1fr;
-      }
-
-      .match-top {
-        display: grid;
-      }
-
-      .countries-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .country-tile {
-        min-height: 128px;
-      }
-
-      .bracket {
-        display: flex;
-        flex-direction: column;
+      .completed-bracket {
         overflow-x: visible;
       }
 
-      .round {
+      .bracket-board {
+        grid-template-columns: 1fr;
         min-width: 0;
       }
     }
   </style>
 </head>
 <body>
-  <main class="app">
-    <header class="hero">
-      <div class="eyebrow">Mundial 2026</div>
-      <h1>Portal Sorteo Mundial 2026</h1>
-      <p>Consulta participantes, países asignados, calendario de grupos y avance del bracket en un solo lugar.</p>
-    </header>
+  <header>
+    <div class="topbar">
+      <div>
+        <h1>Sorteo Mundial 2026</h1>
+        <p class="subtitle">Portal para revisar participantes, países asignados y partidos de fase de grupos.</p>
+      </div>
+      <nav class="tabs" aria-label="Navegación principal">
+        <button class="tab active" type="button" data-screen="participants">Participantes</button>
+        <button class="tab" type="button" data-screen="countries">Países</button>
+        <button class="tab" type="button" data-screen="bracket">Bracket</button>
+        <button class="tab" type="button" data-screen="draw">Sorteo</button>
+      </nav>
+    </div>
+  </header>
 
-    <nav class="tabs" aria-label="Navegación principal">
-      <button class="tab active" type="button" data-view="participants">Participantes</button>
-      <button class="tab" type="button" data-view="countries">Países</button>
-      <button class="tab" type="button" data-view="bracket">Bracket</button>
-    </nav>
-
-    <section id="participants" class="view active" aria-labelledby="participants-title">
-      <div class="panel toolbar">
-        <div class="field">
-          <label id="participants-title" for="participantSelect">Buscar participante</label>
+  <main>
+    <section id="participants" class="screen active">
+      <div class="participant-layout">
+        <aside class="panel">
+          <label for="participantSelect">Buscar por participante</label>
           <select id="participantSelect"></select>
-        </div>
-        <div class="stat">
-          <strong id="participantCount">0</strong>
-          <span>países asignados</span>
+          <p class="note">Si una persona tiene más de una participación, aparecerá una sola vez en el filtro, pero verá todos sus países asignados.</p>
+        </aside>
+        <div>
+          <div class="headline-card">
+            <h2 id="participantHeadline">Participante</h2>
+            <p id="participantSummary">Selecciona un participante para ver sus países y sus rivales de fase de grupos.</p>
+          </div>
+          <div id="participantAssignments" class="country-assignment-grid"></div>
         </div>
       </div>
-      <div id="participantAssignments" class="assignments"></div>
     </section>
 
-    <section id="countries" class="view" aria-labelledby="countries-title">
-      <div class="panel">
-        <div class="section-title">
-          <h2 id="countries-title">Países</h2>
-          <span>48 selecciones</span>
-        </div>
-        <div id="countriesGrid" class="countries-grid" style="padding: 20px;"></div>
+    <section id="countries" class="screen">
+      <div class="countries-header">
+        <h2>Dashboard de países</h2>
+        <p>Selecciona una bandera para ver el dueño y sus partidos de grupo.</p>
       </div>
+      <div id="countriesGrid" class="countries-grid"></div>
       <div id="countryDetail" class="country-detail"></div>
     </section>
 
-    <section id="bracket" class="view" aria-labelledby="bracket-title">
-      <div class="panel bracket-wrap">
-        <div class="section-title">
-          <h2 id="bracket-title">Bracket</h2>
-          <span>Camino al campeón</span>
-        </div>
-        <div id="bracketGrid" class="bracket"></div>
-        <div id="championPanel" class="champion"></div>
+    <section id="bracket" class="screen">
+      <div class="completed-bracket">
+        <h2>Bracket final</h2>
+        <p class="completed-bracket-intro">Vista de eliminación directa con país, dueño y ganador de cada cruce.</p>
+        <div id="completedBracket"></div>
       </div>
     </section>
+
+    <section id="draw" class="screen">
+      <div class="draw-panel">
+        <h2>Repetición del sorteo</h2>
+        <p>Reproduce aquí el video del sorteo cuando esté disponible.</p>
+        <div class="video-frame">
+          <iframe id="drawVideo" title="Repetición del sorteo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+      </div>
+    </section>
+
+    <p class="footer-note">Calendario basado en el Match Schedule oficial de FIFA. Los horarios se muestran convertidos a hora del Centro de México.</p>
   </main>
 
   <script>
     const data = WORLD_CUP_DATA;
-    const countryByCode = new Map(data.countries.map((country) => [country.code, country]));
-    const assignments = data.countries.map((country, index) => ({
-      country,
-      owner: data.participants[index]
+    const teams = new Map(data.countries.map((item) => [item.code, item]));
+    const tickets = data.countries.map((country, index) => ({
+      participantName: data.participants[index],
+      teamCode: country.code
     }));
-    const ownerByCode = new Map(assignments.map((item) => [item.country.code, item.owner]));
-    const uniqueParticipants = [...new Set(data.participants)].sort((a, b) => a.localeCompare(b, "es"));
+    const uniqueParticipants = [...new Set(tickets.map((ticket) => ticket.participantName))]
+      .sort((a, b) => a.localeCompare(b, "es"));
 
-    const tabs = document.querySelectorAll(".tab");
-    const views = document.querySelectorAll(".view");
-    const participantSelect = document.querySelector("#participantSelect");
-    const participantCount = document.querySelector("#participantCount");
-    const participantAssignments = document.querySelector("#participantAssignments");
-    const countriesGrid = document.querySelector("#countriesGrid");
-    const countryDetail = document.querySelector("#countryDetail");
-    const bracketGrid = document.querySelector("#bracketGrid");
-    const championPanel = document.querySelector("#championPanel");
+    let selectedCountryCode = data.countries[0].code;
 
-    function country(code) {
-      return countryByCode.get(code);
+    function getTeam(code) {
+      return teams.get(code);
     }
 
-    function owner(code) {
-      return ownerByCode.get(code) || "Sin asignar";
+    function getOwnerByTeam(code) {
+      const ticket = tickets.find((item) => item.teamCode === code);
+      return ticket ? ticket.participantName : "Sin asignar";
     }
 
-    function matchesFor(code) {
-      return data.matches.filter((match) => match.a === code || match.b === code);
+    function getMatchesForTeam(code) {
+      return data.matches
+        .filter((match) => match.a === code || match.b === code)
+        .sort((a, b) => a.number - b.number);
     }
 
-    function opponentCode(match, code) {
+    function getOpponent(match, code) {
       return match.a === code ? match.b : match.a;
     }
 
-    function renderMatches(code) {
-      return matchesFor(code).map((match) => {
-        const rivalCode = opponentCode(match, code);
-        const rival = country(rivalCode);
+    function showScreen(screenId, button) {
+      document.querySelectorAll(".screen").forEach((screen) => screen.classList.remove("active"));
+      document.querySelectorAll(".tab").forEach((tab) => tab.classList.remove("active"));
+      document.getElementById(screenId).classList.add("active");
+      button.classList.add("active");
+    }
+
+    function initParticipantSelect() {
+      const select = document.getElementById("participantSelect");
+      select.innerHTML = uniqueParticipants
+        .map((name) => `<option value="${name}">${name}</option>`)
+        .join("");
+      select.value = uniqueParticipants.includes("Carlos Escobar") ? "Carlos Escobar" : uniqueParticipants[0];
+      renderParticipantDetail();
+    }
+
+    function renderParticipantDetail() {
+      const name = document.getElementById("participantSelect").value;
+      const ownedTickets = tickets.filter((ticket) => ticket.participantName === name);
+      const countryLabel = ownedTickets.length === 1 ? "país asignado" : "países asignados";
+
+      document.getElementById("participantHeadline").textContent = name;
+      document.getElementById("participantSummary").textContent =
+        `${name} tiene ${ownedTickets.length} ${countryLabel}.`;
+
+      document.getElementById("participantAssignments").innerHTML = ownedTickets.map((ticket) => {
+        const team = getTeam(ticket.teamCode);
+        const teamMatches = getMatchesForTeam(ticket.teamCode);
+
         return `
-          <article class="match-card">
-            <div class="match-top">
-              <span>${match.date} · ${match.time}</span>
-              <span>Partido ${match.number}</span>
+          <article class="assignment-card">
+            <div class="assignment-top">
+              <div class="flag">${team.flag}</div>
+              <div>
+                <h3>${team.displayName}</h3>
+                <p>Grupo ${team.group} · Dueño: ${name}</p>
+              </div>
             </div>
-            <div class="opponent">${rival.flag} vs ${rival.displayName}</div>
-            <div class="rival-owner">Rival: ${owner(rivalCode)}</div>
-            <div class="match-grid">
-              <span>Grupo ${match.group}</span>
-              <span>${match.venue}</span>
-              <span>${country(match.a).displayName} vs ${country(match.b).displayName}</span>
+
+            <h4 class="matches-title">Partidos de fase de grupos</h4>
+            <div class="match-list">
+              ${teamMatches.map((match) => {
+                const opponentCode = getOpponent(match, ticket.teamCode);
+                const opponent = getTeam(opponentCode);
+                const opponentOwner = getOwnerByTeam(opponentCode);
+                return `
+                  <div class="match-card">
+                    <div class="match-date">${match.date}<br>${match.time}</div>
+                    <div class="match-main">
+                      <strong>${team.flag} ${team.displayName} vs ${opponent.flag} ${opponent.displayName}</strong>
+                      <span class="rival-owner">Rival: ${opponentOwner}</span>
+                      <span>Grupo ${match.group} · Partido ${match.number} · ${match.venue}</span>
+                    </div>
+                  </div>
+                `;
+              }).join("")}
             </div>
           </article>
         `;
       }).join("");
     }
 
-    function renderCountryBlock(countryData, ownerName) {
-      return `
-        <article class="panel country-card-full">
-          <div class="country-head">
-            <div class="flag">${countryData.flag}</div>
-            <div>
-              <h2>${countryData.displayName}</h2>
-              <div class="meta">
-                <span class="pill">Grupo ${countryData.group}</span>
-                <span class="pill">Dueño: ${ownerName}</span>
-              </div>
+    function renderCountryDashboard() {
+      const grid = document.getElementById("countriesGrid");
+      grid.innerHTML = data.countries.map((team) => `
+        <button class="country-tile ${team.code === selectedCountryCode ? "active" : ""}" type="button" data-country="${team.code}">
+          <div class="tile-flag">${team.flag}</div>
+          <div class="tile-name">${team.displayName}</div>
+        </button>
+      `).join("");
+
+      renderCountryDetail(selectedCountryCode);
+    }
+
+    function selectCountry(code) {
+      selectedCountryCode = code;
+      renderCountryDashboard();
+      document.getElementById("countryDetail").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    function renderCountryDetail(code) {
+      const team = getTeam(code);
+      const owner = getOwnerByTeam(code);
+      const teamMatches = getMatchesForTeam(code);
+
+      document.getElementById("countryDetail").innerHTML = `
+        <div class="country-detail-grid">
+          <div class="detail-main">
+            <span class="large-flag">${team.flag}</span>
+            <h2>${team.displayName}</h2>
+            <p>Grupo ${team.group}</p>
+            <div class="owner-box">
+              <small>Dueño</small>
+              <strong>${owner}</strong>
             </div>
           </div>
-          <div class="matches">${renderMatches(countryData.code)}</div>
+
+          <div class="panel" style="box-shadow: none;">
+            <h3 style="margin-bottom: 14px;">Partidos de fase de grupos</h3>
+            <div class="match-list">
+              ${teamMatches.map((match) => {
+                const opponentCode = getOpponent(match, code);
+                const opponent = getTeam(opponentCode);
+                const opponentOwner = getOwnerByTeam(opponentCode);
+                return `
+                  <div class="match-card">
+                    <div class="match-date">${match.date}<br>${match.time}</div>
+                    <div class="match-main">
+                      <strong>${team.flag} ${team.displayName} vs ${opponent.flag} ${opponent.displayName}</strong>
+                      <span class="rival-owner">Rival: ${opponentOwner}</span>
+                      <span>Grupo ${match.group} · Partido ${match.number} · ${match.venue}</span>
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCompletedBracket() {
+      const container = document.getElementById("completedBracket");
+      const champion = getTeam(data.bracket.champion);
+      const championOwner = getOwnerByTeam(data.bracket.champion);
+
+      container.innerHTML = `
+        <div class="bracket-board">
+          ${data.bracket.rounds.map((round) => `
+            <div class="bracket-round">
+              <h3 class="bracket-round-title">${round.name}</h3>
+              ${round.matches.map((match, index) => renderBracketMatch(match, index + 1)).join("")}
+              ${round.name === "Final" ? `
+                <div class="champion-panel">
+                  <div class="champion-trophy">🏆</div>
+                  <h3>${champion.flag} ${champion.displayName}</h3>
+                  <p>Campeón</p>
+                  <p><strong>Ganador del sorteo:</strong><br>${championOwner}</p>
+                </div>
+              ` : ""}
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderBracketMatch(match, index) {
+      const teamA = getTeam(match.a);
+      const teamB = getTeam(match.b);
+      const winner = getTeam(match.winner);
+      return `
+        <article class="bracket-match">
+          <div class="bracket-match-header">
+            <span>Partido ${index}</span>
+            <span>${winner.displayName} avanza</span>
+          </div>
+          ${renderBracketTeam(teamA, match.scoreA, match.winner === match.a)}
+          ${renderBracketTeam(teamB, match.scoreB, match.winner === match.b)}
         </article>
       `;
     }
 
-    function renderParticipants() {
-      participantSelect.innerHTML = uniqueParticipants.map((name) => (
-        `<option value="${name}">${name}</option>`
-      )).join("");
-      participantSelect.value = uniqueParticipants[0];
-      renderParticipantSelection();
-    }
-
-    function renderParticipantSelection() {
-      const selected = participantSelect.value;
-      const owned = assignments.filter((item) => item.owner === selected);
-      participantCount.textContent = owned.length;
-      participantAssignments.innerHTML = owned.map((item) => (
-        renderCountryBlock(item.country, item.owner)
-      )).join("");
-    }
-
-    function renderCountries() {
-      countriesGrid.innerHTML = data.countries.map((item, index) => `
-        <button class="country-tile ${index === 0 ? "active" : ""}" type="button" data-country="${item.code}">
-          <span class="flag">${item.flag}</span>
-          <strong>${item.displayName}</strong>
-        </button>
-      `).join("");
-      renderCountryDetail(data.countries[0].code);
-    }
-
-    function renderCountryDetail(code) {
-      const item = country(code);
-      countryDetail.innerHTML = renderCountryBlock(item, owner(code)).replace("country-card-full", "country-detail-card");
-      document.querySelectorAll(".country-tile").forEach((button) => {
-        button.classList.toggle("active", button.dataset.country === code);
-      });
-    }
-
-    function renderBracketTeam(code, score, winnerCode) {
-      const item = country(code);
+    function renderBracketTeam(team, score, isWinner) {
       return `
-        <div class="team-row ${code === winnerCode ? "winner" : ""}">
+        <div class="bracket-team ${isWinner ? "winner" : ""}">
           <div>
-            <span class="team-name">${item.flag} ${item.displayName}</span>
-            <span class="team-owner">${owner(code)}</span>
+            <div class="bracket-country">${team.flag} ${team.displayName}</div>
+            <div class="bracket-owner">${getOwnerByTeam(team.code)}</div>
           </div>
-          <span class="score">${score}</span>
+          <div class="bracket-score">${score}</div>
         </div>
       `;
     }
 
-    function renderBracket() {
-      bracketGrid.innerHTML = data.bracket.rounds.map((round) => `
-        <section class="round">
-          <h2>${round.name}</h2>
-          ${round.matches.map((match) => `
-            <article class="bracket-match">
-              ${renderBracketTeam(match.a, match.scoreA, match.winner)}
-              ${renderBracketTeam(match.b, match.scoreB, match.winner)}
-            </article>
-          `).join("")}
-        </section>
-      `).join("");
-
-      const champion = country(data.bracket.champion);
-      championPanel.innerHTML = `
-        <div class="flag">${champion.flag}</div>
-        <div>
-          <div class="eyebrow">Campeón</div>
-          <h2>${champion.displayName}</h2>
-          <div class="meta">
-            <span class="pill">Ganador del sorteo: ${owner(champion.code)}</span>
-          </div>
-        </div>
-      `;
+    function initDrawVideo() {
+      const frame = document.getElementById("drawVideo");
+      frame.src = data.drawVideoUrl;
     }
 
-    tabs.forEach((tab) => {
-      tab.addEventListener("click", () => {
-        tabs.forEach((item) => item.classList.toggle("active", item === tab));
-        views.forEach((view) => view.classList.toggle("active", view.id === tab.dataset.view));
-      });
+    document.querySelectorAll(".tab").forEach((button) => {
+      button.addEventListener("click", () => showScreen(button.dataset.screen, button));
     });
 
-    participantSelect.addEventListener("change", renderParticipantSelection);
-    countriesGrid.addEventListener("click", (event) => {
+    document.getElementById("participantSelect").addEventListener("change", renderParticipantDetail);
+    document.getElementById("countriesGrid").addEventListener("click", (event) => {
       const button = event.target.closest(".country-tile");
-      if (button) renderCountryDetail(button.dataset.country);
+      if (button) selectCountry(button.dataset.country);
     });
 
-    renderParticipants();
-    renderCountries();
-    renderBracket();
+    initParticipantSelect();
+    renderCountryDashboard();
+    renderCompletedBracket();
+    initDrawVideo();
   </script>
 </body>
 </html>

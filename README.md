@@ -41,6 +41,14 @@ Para actualizar un resultado:
 2. Ajusta `winner` con el codigo del pais ganador.
 3. Si cambia el campeon, actualiza `bracket.champion`.
 
+## Cambiar video del sorteo
+
+La repeticion del sorteo se configura en `drawVideoUrl` dentro de `data.js`. Usa una URL en formato embed, por ejemplo:
+
+```js
+drawVideoUrl: "https://www.youtube.com/embed/ID_DEL_VIDEO"
+```
+
 ## Publicar cambios
 
 Despues de editar, guarda los archivos y ejecuta:
