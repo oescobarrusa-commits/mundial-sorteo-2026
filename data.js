@@ -67,7 +67,7 @@ const WORLD_CUP_DATA = {
   // y pega aqui la URL. La hoja solo necesita dos columnas: name, teamCode.
   // Despues de pegar esta URL una sola vez, edita solo filas en Google Sheets.
   // Si googleSheetCsvUrl queda vacio, la pagina usa assignments como respaldo.
-  googleSheetCsvUrl: "",
+  googleSheetCsvUrl: "https://docs.google.com/spreadsheets/d/1w3zvGkTrGO6jSyOIpb5xBotha0OnxwA9tV4XCxHJjKU/export?format=csv&gid=0",
   // Respaldo local. Cada registro asigna un participante a un pais por teamCode.
   assignments: [],
   matches: [
