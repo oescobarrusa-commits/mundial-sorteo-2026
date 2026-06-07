@@ -6,22 +6,35 @@ Portal web estatico para consultar participantes, paises asignados, partidos de 
 
 Abre `index.html` directamente en el navegador. No requiere backend, base de datos, APIs ni proceso de build.
 
-## Editar asignaciones
+## Editar asignaciones desde Google Sheets
 
-Las asignaciones se controlan en `data.js`.
+Para cambiar asignaciones sin volver a desplegar en Vercel, usa Google Sheets.
 
-- `countries` contiene los 48 paises en orden.
-- `assignments` contiene la relacion editable entre participante y pais.
-- Cada asignacion usa `participantName` y `teamCode`.
-- Un participante puede aparecer varias veces si tiene varios paises.
+La hoja necesita solo dos columnas:
 
-Para cambiar el sorteo, edita solamente `assignments`. Ejemplo:
-
-```js
-{ participantName: "Carlos Escobar", teamCode: "MEX" }
+```csv
+name,teamCode
+Aaron Escobar,POR
+Carlos Escobar,MEX
 ```
 
-Si un pais no aparece en `assignments`, el portal mostrara `Sin asignar`.
+Publica la hoja como CSV y pega esa URL una sola vez en `googleSheetCsvUrl` dentro de `data.js`.
+
+Despues de eso, edita solo las filas de Google Sheets. Al refrescar el sitio, se leeran los datos nuevos.
+
+Detalles:
+
+- `name` es el nombre del participante.
+- `teamCode` es el codigo del pais, por ejemplo `MEX`, `ARG`, `POR`.
+- Un participante puede aparecer varias veces si tiene varios paises.
+- Un pais solo puede tener una asignacion.
+- Si la hoja esta vacia, el portal mostrara los paises como `Sin asignar`.
+
+`assignments` queda como respaldo local por si no se configura Google Sheets. Antes del sorteo puede estar vacio:
+
+```js
+assignments: []
+```
 
 ## Editar partidos
 
