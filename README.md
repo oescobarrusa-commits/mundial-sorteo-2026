@@ -8,7 +8,7 @@ Abre `index.html` directamente en el navegador. No requiere backend, base de dat
 
 ## Editar asignaciones desde Google Sheets
 
-Para cambiar asignaciones sin volver a desplegar en Vercel, usa Google Sheets.
+Para cambiar asignaciones sin volver a desplegar en Vercel, usa Google Sheets detras de un Web App de Apps Script.
 
 La hoja necesita solo dos columnas:
 
@@ -18,9 +18,17 @@ Aaron Escobar,POR
 Carlos Escobar,MEX
 ```
 
-Publica la hoja como CSV y pega esa URL una sola vez en `googleSheetCsvUrl` dentro de `data.js`.
+Configura el backend:
 
-Despues de eso, edita solo las filas de Google Sheets. Al refrescar el sitio, se leeran los datos nuevos.
+1. Crea un proyecto en Apps Script.
+2. Pega el contenido de `apps-script/Code.gs`.
+3. En `SHEET_ID`, confirma el ID de tu Google Sheet.
+4. Despliega como Web App con:
+   - Ejecutar como: `Yo`
+   - Quien tiene acceso: `Cualquier persona`
+5. Copia la URL `/exec` del Web App y pegala en `appsScriptApiUrl` dentro de `data.js`.
+
+Despues de eso, edita solo las filas de Google Sheets. Al refrescar el sitio, se leeran los datos nuevos. La hoja puede quedar privada; los visitantes solo leen el JSON del Web App.
 
 Detalles:
 
@@ -31,11 +39,13 @@ Detalles:
 - Un pais solo puede tener una asignacion.
 - Si la hoja esta vacia, el portal mostrara los paises como `Sin asignar`.
 
-`assignments` queda como respaldo local por si no se configura Google Sheets. Antes del sorteo puede estar vacio:
+`assignments` queda como respaldo local por si no se configura Apps Script. Antes del sorteo puede estar vacio:
 
 ```js
 assignments: []
 ```
+
+`googleSheetCsvUrl` es solo un respaldo opcional por CSV publico. Para proteger la hoja, dejalo vacio.
 
 ## Editar partidos
 

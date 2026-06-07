@@ -1049,21 +1049,55 @@
     }
 
     async function loadExternalAssignments() {
-      if (!data.googleSheetCsvUrl) return;
-
       try {
-        const response = await fetch(data.googleSheetCsvUrl, { cache: "no-store" });
-        if (!response.ok) throw new Error("No se pudo leer Google Sheets");
-        const csv = await response.text();
-        const sheetData = parseSheetData(csv);
+        const sheetData = data.appsScriptApiUrl
+          ? await loadAppsScriptData(data.appsScriptApiUrl)
+          : await loadCsvData(data.googleSheetCsvUrl);
+        if (!sheetData) return;
+
         data = {
           ...data,
           participants: sheetData.participants,
           assignments: sheetData.assignments
         };
       } catch (error) {
-        console.warn("Usando assignments locales porque Google Sheets no cargo.", error);
+        console.warn("Usando datos locales porque la fuente externa no cargo.", error);
       }
+    }
+
+    async function loadAppsScriptData(url) {
+      const endpoint = new URL(url);
+      endpoint.searchParams.set("t", Date.now().toString());
+      const response = await fetch(endpoint.toString(), { cache: "no-store" });
+      if (!response.ok) throw new Error("No se pudo leer Apps Script");
+      const payload = await response.json();
+      return normalizeExternalData(payload);
+    }
+
+    async function loadCsvData(url) {
+      if (!url) return null;
+      const response = await fetch(url, { cache: "no-store" });
+      if (!response.ok) throw new Error("No se pudo leer Google Sheets");
+      const csv = await response.text();
+      return parseSheetData(csv);
+    }
+
+    function normalizeExternalData(payload) {
+      const rows = Array.isArray(payload?.rows) ? payload.rows : [];
+      const participants = Array.isArray(payload?.participants)
+        ? payload.participants.map((name) => String(name).trim()).filter(Boolean)
+        : rows.map((row) => String(row.participantName || row.name || "").trim()).filter(Boolean);
+      const assignments = Array.isArray(payload?.assignments)
+        ? payload.assignments
+        : rows;
+
+      return {
+        participants: [...new Set(participants)],
+        assignments: assignments.map((assignment) => ({
+          participantName: String(assignment.participantName || assignment.name || "").trim(),
+          teamCode: String(assignment.teamCode || assignment.code || "").trim().toUpperCase()
+        })).filter((assignment) => assignment.participantName && assignment.teamCode)
+      };
     }
 
     function parseSheetData(csv) {

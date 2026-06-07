@@ -63,11 +63,11 @@ const WORLD_CUP_DATA = {
     "Haakon Escobar", "Samantha Escobar", "Ricardo Valente Escobar", "Blanca Aguirre",
     "Luis Escobar Lopez", "Gabriela Lopez Flores", "Matias Villegas", "Aislinn Villagran Villegas"
   ],
-  // Para cambiar el sorteo sin tocar codigo, publica un Google Sheet como CSV
-  // y pega aqui la URL. La hoja solo necesita dos columnas: name, teamCode.
-  // Despues de pegar esta URL una sola vez, edita solo filas en Google Sheets.
-  // Si googleSheetCsvUrl queda vacio, la pagina usa assignments como respaldo.
-  googleSheetCsvUrl: "https://docs.google.com/spreadsheets/d/1w3zvGkTrGO6jSyOIpb5xBotha0OnxwA9tV4XCxHJjKU/export?format=csv&gid=0",
+  // Para cambiar el sorteo sin tocar codigo, usa el Web App de Apps Script.
+  // La hoja puede quedar privada; la pagina solo lee el JSON del backend.
+  appsScriptApiUrl: "",
+  // Respaldo opcional por CSV publico. Dejalo vacio si quieres proteger la hoja.
+  googleSheetCsvUrl: "",
   // Respaldo local. Cada registro asigna un participante a un pais por teamCode.
   assignments: [],
   matches: [
