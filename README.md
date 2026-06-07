@@ -66,22 +66,33 @@ Los horarios vienen del Match Schedule oficial de FIFA y estan convertidos a hor
 
 ## Actualizar bracket
 
-El bracket esta vacio antes del torneo:
+El bracket se lee desde una segunda pestaña del Google Sheet llamada `bracket`.
 
-```js
-bracket: {
-  rounds: [],
-  champion: ""
-}
+La primera fila debe tener estos encabezados:
+
+```csv
+dieciseisavos,octavos,cuartos,semifinales,final
 ```
 
-Cuando el torneo avance, agrega las rondas en `bracket.rounds` dentro de `data.js`.
+Debajo de cada columna van codigos de pais. Cada dos paises consecutivos forman un partido.
 
-Para actualizar un resultado:
+Cantidad esperada por columna:
 
-1. Cambia `scoreA` y `scoreB`.
-2. Ajusta `winner` con el codigo del pais ganador.
-3. Si cambia el campeon, actualiza `bracket.champion`.
+- `dieciseisavos`: 32 paises
+- `octavos`: 16 paises
+- `cuartos`: 8 paises
+- `semifinales`: 4 paises
+- `final`: 2 paises
+
+Ejemplo:
+
+```csv
+dieciseisavos,octavos,cuartos,semifinales,final
+MEX,BRA,ARG,ARG,ARG
+AUS,FRA,ESP,URU,URU
+BRA,ARG,URU,,
+SCO,POR,COL,,
+```
 
 ## Cambiar video del sorteo
 

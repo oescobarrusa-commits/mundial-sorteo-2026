@@ -960,8 +960,9 @@
         return;
       }
 
-      const champion = getTeam(data.bracket.champion);
-      const championOwner = getOwnerByTeam(data.bracket.champion);
+      const championCode = data.bracket?.champion || "";
+      const champion = championCode ? getTeam(championCode) : null;
+      const championOwner = championCode ? getOwnerByTeam(championCode) : "";
 
       container.innerHTML = `
         <div class="bracket-board">
@@ -973,7 +974,7 @@
               </summary>
               <div class="bracket-round-content">
                 ${round.matches.map((match, index) => renderBracketMatch(match, index + 1)).join("")}
-                ${round.name === "Final" ? `
+                ${round.name === "Final" && champion ? `
                   <div class="champion-panel">
                     <div class="champion-trophy">🏆</div>
                     <h3>${champion.flag} ${champion.displayName}</h3>
@@ -997,12 +998,12 @@
     function renderBracketMatch(match, index) {
       const teamA = getTeam(match.a);
       const teamB = getTeam(match.b);
-      const winner = getTeam(match.winner);
+      const winner = match.winner ? getTeam(match.winner) : null;
       return `
         <article class="bracket-match">
           <div class="bracket-match-header">
             <span>Partido ${index}</span>
-            <span>${winner.displayName} avanza</span>
+            <span>${winner ? `${winner.displayName} avanza` : "Por jugar"}</span>
           </div>
           ${renderBracketTeam(teamA, match.scoreA, match.winner === match.a)}
           ${renderBracketTeam(teamB, match.scoreB, match.winner === match.b)}
@@ -1017,7 +1018,7 @@
             <div class="bracket-country">${team.flag} ${team.displayName}</div>
             <div class="bracket-owner">${getOwnerByTeam(team.code)}</div>
           </div>
-          <div class="bracket-score">${score}</div>
+          <div class="bracket-score">${score ?? "-"}</div>
         </div>
       `;
     }
@@ -1058,7 +1059,8 @@
         data = {
           ...data,
           participants: sheetData.participants,
-          assignments: sheetData.assignments
+          assignments: sheetData.assignments,
+          bracket: sheetData.bracket || data.bracket
         };
       } catch (error) {
         console.warn("Usando datos locales porque la fuente externa no cargo.", error);
@@ -1096,7 +1098,27 @@
         assignments: assignments.map((assignment) => ({
           participantName: String(assignment.participantName || assignment.name || "").trim(),
           teamCode: String(assignment.teamCode || assignment.code || "").trim().toUpperCase()
-        })).filter((assignment) => assignment.participantName && assignment.teamCode)
+        })).filter((assignment) => assignment.participantName && assignment.teamCode),
+        bracket: normalizeBracket(payload?.bracket)
+      };
+    }
+
+    function normalizeBracket(bracket) {
+      const rounds = Array.isArray(bracket?.rounds) ? bracket.rounds : [];
+      return {
+        rounds: rounds.map((round) => ({
+          name: String(round.name || "").trim(),
+          matches: Array.isArray(round.matches)
+            ? round.matches.map((match) => ({
+              a: String(match.a || "").trim().toUpperCase(),
+              b: String(match.b || "").trim().toUpperCase(),
+              scoreA: match.scoreA,
+              scoreB: match.scoreB,
+              winner: String(match.winner || "").trim().toUpperCase()
+            })).filter((match) => match.a && match.b)
+            : []
+        })).filter((round) => round.name && round.matches.length),
+        champion: String(bracket?.champion || "").trim().toUpperCase()
       };
     }
 

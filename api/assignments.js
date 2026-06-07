@@ -44,6 +44,26 @@ function normalizeExternalData(payload) {
     assignments: assignments.map((assignment) => ({
       participantName: String(assignment.participantName || assignment.name || "").trim(),
       teamCode: String(assignment.teamCode || assignment.code || "").trim().toUpperCase()
-    })).filter((assignment) => assignment.participantName && assignment.teamCode)
+    })).filter((assignment) => assignment.participantName && assignment.teamCode),
+    bracket: normalizeBracket(payload?.bracket)
+  };
+}
+
+function normalizeBracket(bracket) {
+  const rounds = Array.isArray(bracket?.rounds) ? bracket.rounds : [];
+  return {
+    rounds: rounds.map((round) => ({
+      name: String(round.name || "").trim(),
+      matches: Array.isArray(round.matches)
+        ? round.matches.map((match) => ({
+          a: String(match.a || "").trim().toUpperCase(),
+          b: String(match.b || "").trim().toUpperCase(),
+          scoreA: match.scoreA,
+          scoreB: match.scoreB,
+          winner: String(match.winner || "").trim().toUpperCase()
+        })).filter((match) => match.a && match.b)
+        : []
+    })).filter((round) => round.name && round.matches.length),
+    champion: String(bracket?.champion || "").trim().toUpperCase()
   };
 }

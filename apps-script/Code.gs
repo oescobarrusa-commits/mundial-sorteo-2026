@@ -1,5 +1,6 @@
 const SHEET_ID = "1w3zvGkTrGO6jSyOIpb5xBotha0OnxwA9tV4XCxHJjKU";
 const SHEET_NAME = "";
+const BRACKET_SHEET_NAME = "bracket";
 
 function doGet() {
   const sheet = getSheet();
@@ -15,7 +16,8 @@ function doGet() {
 
   const payload = {
     participants: unique(rows.map((row) => row.participantName)),
-    assignments: rows.filter((row) => row.teamCode)
+    assignments: rows.filter((row) => row.teamCode),
+    bracket: getBracket()
   };
 
   return ContentService
@@ -27,6 +29,49 @@ function getSheet() {
   const spreadsheet = SpreadsheetApp.openById(SHEET_ID);
   if (SHEET_NAME) return spreadsheet.getSheetByName(SHEET_NAME);
   return spreadsheet.getSheets()[0];
+}
+
+function getBracket() {
+  const spreadsheet = SpreadsheetApp.openById(SHEET_ID);
+  const sheet = spreadsheet.getSheetByName(BRACKET_SHEET_NAME);
+  if (!sheet) return { rounds: [], champion: "" };
+
+  const values = sheet.getDataRange().getDisplayValues();
+  if (values.length < 2) return { rounds: [], champion: "" };
+
+  const headers = values[0].map((header) => normalizeHeader(header));
+  const rounds = getBracketRoundConfigs()
+    .map((config) => {
+      const columnIndex = headers.findIndex((header) => config.headers.includes(header));
+      if (columnIndex === -1) return null;
+
+      const teams = values
+        .slice(1)
+        .map((row) => String(row[columnIndex] || "").trim().toUpperCase())
+        .filter(Boolean);
+      const matches = [];
+
+      for (let index = 0; index < teams.length; index += 2) {
+        if (teams[index] && teams[index + 1]) {
+          matches.push({ a: teams[index], b: teams[index + 1] });
+        }
+      }
+
+      return matches.length ? { name: config.name, matches } : null;
+    })
+    .filter(Boolean);
+
+  return { rounds, champion: "" };
+}
+
+function getBracketRoundConfigs() {
+  return [
+    { name: "Dieciseisavos", headers: ["dieciseisavos", "roundof32"] },
+    { name: "Octavos", headers: ["octavos", "roundof16"] },
+    { name: "Cuartos", headers: ["cuartos", "cuartosdefinal", "quarterfinals"] },
+    { name: "Semifinal", headers: ["semifinal", "semifinales", "semifinals"] },
+    { name: "Final", headers: ["final"] }
+  ];
 }
 
 function isHeaderRow(row) {
