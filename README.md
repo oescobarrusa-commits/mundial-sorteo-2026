@@ -60,6 +60,10 @@ drawVideoUrl: "https://www.youtube.com/watch?v=ID_DEL_VIDEO"
 
 El bracket se muestra por rondas cerradas por default. Los usuarios pueden abrir Dieciseisavos, Octavos, Cuartos, Semifinales o Finales desde el menu de cada ronda.
 
+## Contador de visitas
+
+El contador discreto del footer se configura en `visitCounterUrl` dentro de `data.js`. Como el sitio es estatico y no tiene backend propio, el conteo depende de un servicio externo de contador por imagen.
+
 ## Publicar cambios
 
 Despues de editar, guarda los archivos y ejecuta:

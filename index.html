@@ -574,6 +574,70 @@
       text-align: center;
     }
 
+    .site-footer {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 42px 18px 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(6, 16, 31, 0.62);
+    }
+
+    .footer-attribution {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: rgba(174, 187, 208, 0.72);
+      text-align: left;
+    }
+
+    .footer-attribution__logo {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 auto;
+      object-fit: contain;
+      opacity: 0.9;
+    }
+
+    .footer-attribution__text {
+      display: grid;
+      gap: 2px;
+    }
+
+    .footer-attribution__text p {
+      color: inherit;
+      font-size: 12px;
+      line-height: 1.25;
+    }
+
+    .footer-attribution__text p:first-child {
+      color: rgba(247, 201, 72, 0.78);
+      font-weight: 700;
+    }
+
+    .visit-counter {
+      position: absolute;
+      right: 16px;
+      bottom: 8px;
+      display: inline-flex;
+      align-items: center;
+      min-height: 12px;
+      opacity: 0.28;
+      filter: saturate(0.45);
+      transition: opacity 160ms ease;
+    }
+
+    .visit-counter:hover {
+      opacity: 0.75;
+    }
+
+    .visit-counter img {
+      display: block;
+      max-width: 86px;
+      height: 14px;
+    }
+
     @media (max-width: 1000px) {
       .participant-layout,
       .country-detail-grid {
@@ -620,6 +684,17 @@
 
       .bracket-round-hint {
         grid-column: 1 / -1;
+      }
+
+      .site-footer {
+        justify-content: flex-start;
+        padding-right: 18px;
+        padding-bottom: 28px;
+      }
+
+      .visit-counter {
+        right: 18px;
+        bottom: 8px;
       }
     }
   </style>
@@ -687,6 +762,23 @@
 
     <p class="footer-note">Calendario basado en el Match Schedule oficial de FIFA. Los horarios se muestran convertidos a hora del Centro de México.</p>
   </main>
+
+  <footer class="site-footer">
+    <div class="footer-attribution">
+      <img
+        alt="NekStep logo"
+        class="footer-attribution__logo"
+        src="nekstep-logo-transparent.png"
+      >
+      <div class="footer-attribution__text">
+        <p>Developed by NekStep</p>
+        <p>© 2026 NekStep. All rights reserved.</p>
+      </div>
+    </div>
+    <span class="visit-counter" title="Visitas">
+      <img id="visitCounter" alt="Contador de visitas" loading="lazy">
+    </span>
+  </footer>
 
   <script>
     const data = WORLD_CUP_DATA;
@@ -907,6 +999,12 @@
       frame.src = toYouTubeEmbedUrl(data.drawVideoUrl);
     }
 
+    function initVisitCounter() {
+      const counter = document.getElementById("visitCounter");
+      if (!counter || !data.visitCounterUrl) return;
+      counter.src = data.visitCounterUrl;
+    }
+
     function toYouTubeEmbedUrl(url) {
       if (!url) return "";
       if (url.includes("/embed/")) return url;
@@ -942,6 +1040,7 @@
     renderCountryDashboard();
     renderCompletedBracket();
     initDrawVideo();
+    initVisitCounter();
   </script>
 </body>
 </html>

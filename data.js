@@ -236,5 +236,7 @@ const WORLD_CUP_DATA = {
     champion: "ARG"
   },
   // Pega aqui la URL del video del sorteo. Acepta URL normal de YouTube, youtu.be o embed.
-  drawVideoUrl: "https://www.youtube.com/watch?v=VIDEO_ID_AQUI"
+  drawVideoUrl: "https://www.youtube.com/watch?v=VIDEO_ID_AQUI",
+  // Contador externo discreto para sitio estatico. Cambia la URL si usas otro servicio.
+  visitCounterUrl: "https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fmundial-sorteo-2026.vercel.app&count_bg=%2306101F&title_bg=%2306101F&icon=&icon_color=%23FFFFFF&title=visitas&edge_flat=true"
 };
