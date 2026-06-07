@@ -18,6 +18,8 @@ Aaron Escobar,POR
 Carlos Escobar,MEX
 ```
 
+La pestaña principal debe llamarse `participantes`.
+
 Configura el backend:
 
 1. Crea un proyecto en Apps Script.

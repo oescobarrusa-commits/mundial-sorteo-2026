@@ -1,5 +1,5 @@
 const SHEET_ID = "1w3zvGkTrGO6jSyOIpb5xBotha0OnxwA9tV4XCxHJjKU";
-const SHEET_NAME = "";
+const SHEET_NAME = "participantes";
 const BRACKET_SHEET_NAME = "bracket";
 
 function doGet() {
