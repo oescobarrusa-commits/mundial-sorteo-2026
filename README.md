@@ -24,8 +24,8 @@ Despues de eso, edita solo las filas de Google Sheets. Al refrescar el sitio, se
 
 Detalles:
 
-- `name` es el nombre del participante.
-- `teamCode` es el codigo del pais, por ejemplo `MEX`, `ARG`, `POR`.
+- La primera columna es el nombre del participante y alimenta el combo "Buscar por participante".
+- La segunda columna es el codigo del pais, por ejemplo `MEX`, `ARG`, `POR`. Puede quedar vacia antes del sorteo.
 - Cada participante aparece una sola vez.
 - Cada participante tiene maximo un pais asignado.
 - Un pais solo puede tener una asignacion.

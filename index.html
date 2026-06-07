@@ -1055,16 +1055,12 @@
 
     function parseSheetData(csv) {
       const rows = parseCsvRows(csv).filter((row) => row.some((cell) => cell.trim()));
-      if (rows.length < 2) return { participants: [], assignments: [] };
+      if (!rows.length) return { participants: [], assignments: [] };
 
-      const headers = rows[0].map((header) => normalizeHeader(header));
-      const nameIndex = findHeaderIndex(headers, ["name", "participantname", "participant"]);
-      const teamCodeIndex = findHeaderIndex(headers, ["teamcode", "code", "countrycode"]);
-      if (nameIndex === -1 || teamCodeIndex === -1) return { participants: [], assignments: [] };
-
-      const parsedRows = rows.slice(1).map((row) => ({
-        participantName: (row[nameIndex] || "").trim(),
-        teamCode: (row[teamCodeIndex] || "").trim().toUpperCase()
+      const dataRows = isSheetHeaderRow(rows[0]) ? rows.slice(1) : rows;
+      const parsedRows = dataRows.map((row) => ({
+        participantName: (row[0] || "").trim(),
+        teamCode: (row[1] || "").trim().toUpperCase()
       })).filter((row) => row.participantName);
 
       return {
@@ -1111,8 +1107,11 @@
       return header.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
     }
 
-    function findHeaderIndex(headers, candidates) {
-      return headers.findIndex((header) => candidates.includes(header));
+    function isSheetHeaderRow(row) {
+      const firstColumn = normalizeHeader(row[0] || "");
+      const secondColumn = normalizeHeader(row[1] || "");
+      return ["name", "participantname", "participant"].includes(firstColumn) ||
+        ["teamcode", "code", "countrycode"].includes(secondColumn);
     }
 
     async function initApp() {
