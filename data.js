@@ -235,5 +235,6 @@ const WORLD_CUP_DATA = {
     ],
     champion: "ARG"
   },
-  drawVideoUrl: "https://www.youtube.com/embed/VIDEO_ID_AQUI"
+  // Pega aqui la URL del video del sorteo. Acepta URL normal de YouTube, youtu.be o embed.
+  drawVideoUrl: "https://www.youtube.com/watch?v=VIDEO_ID_AQUI"
 };

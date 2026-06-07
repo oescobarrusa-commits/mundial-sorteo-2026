@@ -50,11 +50,15 @@ Para actualizar un resultado:
 
 ## Cambiar video del sorteo
 
-La repeticion del sorteo se configura en `drawVideoUrl` dentro de `data.js`. Usa una URL en formato embed, por ejemplo:
+La repeticion del sorteo se configura en `drawVideoUrl` dentro de `data.js`. Puedes usar una URL normal de YouTube, `youtu.be` o formato embed:
 
 ```js
-drawVideoUrl: "https://www.youtube.com/embed/ID_DEL_VIDEO"
+drawVideoUrl: "https://www.youtube.com/watch?v=ID_DEL_VIDEO"
 ```
+
+## Bracket desplegable
+
+El bracket se muestra por rondas cerradas por default. Los usuarios pueden abrir Dieciseisavos, Octavos, Cuartos, Semifinales o Finales desde el menu de cada ronda.
 
 ## Publicar cambios
 

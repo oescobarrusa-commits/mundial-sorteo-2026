@@ -398,25 +398,65 @@
 
     .bracket-board {
       display: grid;
-      grid-template-columns: repeat(5, minmax(260px, 1fr));
-      gap: 18px;
-      min-width: 1380px;
-      align-items: start;
+      gap: 14px;
     }
 
     .bracket-round {
-      display: grid;
-      align-content: start;
-      gap: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.045);
     }
 
     .bracket-round-title {
-      margin-bottom: 4px;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 14px;
+      align-items: center;
+      padding: 18px;
       color: var(--gold);
       font-size: 14px;
       font-weight: 900;
       letter-spacing: 0.9px;
       text-transform: uppercase;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .bracket-round-title::-webkit-details-marker {
+      display: none;
+    }
+
+    .bracket-round-title::after {
+      content: "+";
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border: 1px solid rgba(247, 201, 72, 0.35);
+      border-radius: 50%;
+      color: #151515;
+      background: var(--gold);
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .bracket-round[open] .bracket-round-title::after {
+      content: "-";
+    }
+
+    .bracket-round-hint {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .bracket-round-content {
+      display: grid;
+      gap: 16px;
+      padding: 0 18px 18px;
     }
 
     .bracket-match {
@@ -574,13 +614,12 @@
         font-size: 18px !important;
       }
 
-      .completed-bracket {
-        overflow-x: visible;
+      .bracket-round-title {
+        grid-template-columns: 1fr auto;
       }
 
-      .bracket-board {
-        grid-template-columns: 1fr;
-        min-width: 0;
+      .bracket-round-hint {
+        grid-column: 1 / -1;
       }
     }
   </style>
@@ -807,21 +846,32 @@
       container.innerHTML = `
         <div class="bracket-board">
           ${data.bracket.rounds.map((round) => `
-            <div class="bracket-round">
-              <h3 class="bracket-round-title">${round.name}</h3>
-              ${round.matches.map((match, index) => renderBracketMatch(match, index + 1)).join("")}
-              ${round.name === "Final" ? `
-                <div class="champion-panel">
-                  <div class="champion-trophy">🏆</div>
-                  <h3>${champion.flag} ${champion.displayName}</h3>
-                  <p>Campeón</p>
-                  <p><strong>Ganador del sorteo:</strong><br>${championOwner}</p>
+            <details class="bracket-round">
+              <summary class="bracket-round-title">
+                <span>${getRoundDisplayName(round.name)}</span>
+                <span class="bracket-round-hint">Click para desplegar</span>
+              </summary>
+              <div class="bracket-round-content">
+                ${round.matches.map((match, index) => renderBracketMatch(match, index + 1)).join("")}
+                ${round.name === "Final" ? `
+                  <div class="champion-panel">
+                    <div class="champion-trophy">🏆</div>
+                    <h3>${champion.flag} ${champion.displayName}</h3>
+                    <p>Campeón</p>
+                    <p><strong>Ganador del sorteo:</strong><br>${championOwner}</p>
+                  </div>
+                ` : ""}
                 </div>
-              ` : ""}
-            </div>
+            </details>
           `).join("")}
         </div>
       `;
+    }
+
+    function getRoundDisplayName(name) {
+      if (name === "Semifinal") return "Semifinales";
+      if (name === "Final") return "Finales";
+      return name;
     }
 
     function renderBracketMatch(match, index) {
@@ -854,7 +904,28 @@
 
     function initDrawVideo() {
       const frame = document.getElementById("drawVideo");
-      frame.src = data.drawVideoUrl;
+      frame.src = toYouTubeEmbedUrl(data.drawVideoUrl);
+    }
+
+    function toYouTubeEmbedUrl(url) {
+      if (!url) return "";
+      if (url.includes("/embed/")) return url;
+
+      try {
+        const parsed = new URL(url);
+        const host = parsed.hostname.replace("www.", "");
+        let videoId = "";
+
+        if (host === "youtu.be") {
+          videoId = parsed.pathname.slice(1);
+        } else if (host.endsWith("youtube.com")) {
+          videoId = parsed.searchParams.get("v") || "";
+        }
+
+        return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+      } catch (error) {
+        return url;
+      }
     }
 
     document.querySelectorAll(".tab").forEach((button) => {
