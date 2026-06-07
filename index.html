@@ -722,8 +722,8 @@
 
     <section id="bracket" class="screen">
       <div class="completed-bracket">
-        <h2>Bracket final</h2>
-        <p class="completed-bracket-intro">Vista de eliminación directa con país, dueño y ganador de cada cruce.</p>
+        <h2>Bracket</h2>
+        <p class="completed-bracket-intro">La fase de eliminación directa aparecerá aquí cuando el torneo avance.</p>
         <div id="completedBracket"></div>
       </div>
     </section>
@@ -945,12 +945,27 @@
 
     function renderCompletedBracket() {
       const container = document.getElementById("completedBracket");
+      const rounds = data.bracket?.rounds || [];
+      if (!rounds.length) {
+        container.innerHTML = `
+          <article class="assignment-card">
+            <div class="assignment-top">
+              <div class="flag">?</div>
+              <div>
+                <h3>Bracket pendiente</h3>
+              </div>
+            </div>
+          </article>
+        `;
+        return;
+      }
+
       const champion = getTeam(data.bracket.champion);
       const championOwner = getOwnerByTeam(data.bracket.champion);
 
       container.innerHTML = `
         <div class="bracket-board">
-          ${data.bracket.rounds.map((round) => `
+          ${rounds.map((round) => `
             <details class="bracket-round">
               <summary class="bracket-round-title">
                 <span>${getRoundDisplayName(round.name)}</span>

@@ -145,50 +145,8 @@ const WORLD_CUP_DATA = {
     { number: 72, a: "COD", b: "UZB", group: "K", date: "27 de junio", time: "17:30 h CDMX", venue: "Atlanta Stadium" }
   ],
   bracket: {
-    rounds: [
-      { name: "Dieciseisavos", matches: [
-        { a: "MEX", scoreA: 2, b: "AUS", scoreB: 1, winner: "MEX" },
-        { a: "BRA", scoreA: 3, b: "SCO", scoreB: 0, winner: "BRA" },
-        { a: "FRA", scoreA: 2, b: "NOR", scoreB: 0, winner: "FRA" },
-        { a: "ENG", scoreA: 1, b: "GHA", scoreB: 0, winner: "ENG" },
-        { a: "ARG", scoreA: 4, b: "JOR", scoreB: 1, winner: "ARG" },
-        { a: "POR", scoreA: 2, b: "UZB", scoreB: 0, winner: "POR" },
-        { a: "ESP", scoreA: 3, b: "CPV", scoreB: 1, winner: "ESP" },
-        { a: "GER", scoreA: 2, b: "CIV", scoreB: 1, winner: "GER" },
-        { a: "USA", scoreA: 2, b: "TUR", scoreB: 1, winner: "USA" },
-        { a: "NED", scoreA: 2, b: "TUN", scoreB: 0, winner: "NED" },
-        { a: "BEL", scoreA: 3, b: "NZL", scoreB: 1, winner: "BEL" },
-        { a: "COL", scoreA: 2, b: "COD", scoreB: 1, winner: "COL" },
-        { a: "URU", scoreA: 2, b: "KSA", scoreB: 0, winner: "URU" },
-        { a: "MAR", scoreA: 1, b: "HAI", scoreB: 0, winner: "MAR" },
-        { a: "SUI", scoreA: 2, b: "PAR", scoreB: 1, winner: "SUI" },
-        { a: "CRO", scoreA: 2, b: "SWE", scoreB: 1, winner: "CRO" }
-      ] },
-      { name: "Octavos", matches: [
-        { a: "BRA", scoreA: 2, b: "MEX", scoreB: 1, winner: "BRA" },
-        { a: "FRA", scoreA: 2, b: "ENG", scoreB: 1, winner: "FRA" },
-        { a: "ARG", scoreA: 3, b: "POR", scoreB: 2, winner: "ARG" },
-        { a: "ESP", scoreA: 2, b: "GER", scoreB: 1, winner: "ESP" },
-        { a: "USA", scoreA: 2, b: "NED", scoreB: 1, winner: "USA" },
-        { a: "COL", scoreA: 2, b: "BEL", scoreB: 1, winner: "COL" },
-        { a: "URU", scoreA: 2, b: "MAR", scoreB: 0, winner: "URU" },
-        { a: "CRO", scoreA: 2, b: "SUI", scoreB: 1, winner: "CRO" }
-      ] },
-      { name: "Cuartos", matches: [
-        { a: "BRA", scoreA: 2, b: "FRA", scoreB: 1, winner: "BRA" },
-        { a: "ARG", scoreA: 2, b: "ESP", scoreB: 1, winner: "ARG" },
-        { a: "COL", scoreA: 2, b: "USA", scoreB: 1, winner: "COL" },
-        { a: "URU", scoreA: 2, b: "CRO", scoreB: 1, winner: "URU" }
-      ] },
-      { name: "Semifinal", matches: [
-        { a: "ARG", scoreA: 2, b: "BRA", scoreB: 1, winner: "ARG" },
-        { a: "URU", scoreA: 2, b: "COL", scoreB: 1, winner: "URU" }
-      ] },
-      { name: "Final", matches: [
-        { a: "ARG", scoreA: 3, b: "URU", scoreB: 1, winner: "ARG" }
-      ] }
-    ],
-    champion: "ARG"
+    rounds: [],
+    champion: ""
   },
   // Pega aqui la URL del video del sorteo. Acepta URL normal de YouTube, youtu.be o embed.
   drawVideoUrl: "https://www.youtube.com/watch?v=VIDEO_ID_AQUI"

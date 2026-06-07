@@ -54,7 +54,16 @@ Los horarios vienen del Match Schedule oficial de FIFA y estan convertidos a hor
 
 ## Actualizar bracket
 
-El bracket esta en `bracket.rounds` dentro de `data.js`.
+El bracket esta vacio antes del torneo:
+
+```js
+bracket: {
+  rounds: [],
+  champion: ""
+}
+```
+
+Cuando el torneo avance, agrega las rondas en `bracket.rounds` dentro de `data.js`.
 
 Para actualizar un resultado:
 
