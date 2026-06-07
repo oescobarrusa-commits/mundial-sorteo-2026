@@ -40,20 +40,24 @@ function getBracket() {
   if (values.length < 2) return { rounds: [], champion: "" };
 
   const headers = values[0].map((header) => normalizeHeader(header));
+  const champion = getColumnValues(values, headers, ["winner", "champion", "campeon"])[0] || "";
   const rounds = getBracketRoundConfigs()
     .map((config) => {
       const columnIndex = headers.findIndex((header) => config.headers.includes(header));
       if (columnIndex === -1) return null;
 
-      const teams = values
-        .slice(1)
-        .map((row) => String(row[columnIndex] || "").trim().toUpperCase())
-        .filter(Boolean);
+      const teams = getColumnValues(values, headers, config.headers);
       const matches = [];
 
       for (let index = 0; index < teams.length; index += 2) {
         if (teams[index] && teams[index + 1]) {
-          matches.push({ a: teams[index], b: teams[index + 1] });
+          matches.push({
+            a: teams[index],
+            b: teams[index + 1],
+            winner: config.name === "Final" && [teams[index], teams[index + 1]].includes(champion)
+              ? champion
+              : ""
+          });
         }
       }
 
@@ -61,7 +65,16 @@ function getBracket() {
     })
     .filter(Boolean);
 
-  return { rounds, champion: "" };
+  return { rounds, champion };
+}
+
+function getColumnValues(values, headers, headerCandidates) {
+  const columnIndex = headers.findIndex((header) => headerCandidates.includes(header));
+  if (columnIndex === -1) return [];
+  return values
+    .slice(1)
+    .map((row) => String(row[columnIndex] || "").trim().toUpperCase())
+    .filter(Boolean);
 }
 
 function getBracketRoundConfigs() {

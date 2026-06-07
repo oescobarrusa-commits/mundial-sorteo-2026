@@ -71,10 +71,11 @@ El bracket se lee desde una segunda pestaña del Google Sheet llamada `bracket`.
 La primera fila debe tener estos encabezados:
 
 ```csv
-dieciseisavos,octavos,cuartos,semifinales,final
+dieciseisavos,octavos,cuartos,semifinales,final,winner
 ```
 
 Debajo de cada columna van codigos de pais. Cada dos paises consecutivos forman un partido.
+En `winner` va un solo codigo de pais: el campeon.
 
 Cantidad esperada por columna:
 
@@ -83,15 +84,16 @@ Cantidad esperada por columna:
 - `cuartos`: 8 paises
 - `semifinales`: 4 paises
 - `final`: 2 paises
+- `winner`: 1 pais
 
 Ejemplo:
 
 ```csv
-dieciseisavos,octavos,cuartos,semifinales,final
-MEX,BRA,ARG,ARG,ARG
-AUS,FRA,ESP,URU,URU
-BRA,ARG,URU,,
-SCO,POR,COL,,
+dieciseisavos,octavos,cuartos,semifinales,final,winner
+MEX,BRA,ARG,ARG,ARG,ARG
+AUS,FRA,ESP,URU,URU,
+BRA,ARG,URU,,,
+SCO,POR,COL,,,
 ```
 
 ## Cambiar video del sorteo
