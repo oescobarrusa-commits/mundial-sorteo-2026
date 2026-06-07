@@ -63,9 +63,9 @@ const WORLD_CUP_DATA = {
     "Haakon Escobar", "Samantha Escobar", "Ricardo Valente Escobar", "Blanca Aguirre",
     "Luis Escobar Lopez", "Gabriela Lopez Flores", "Matias Villegas", "Aislinn Villagran Villegas"
   ],
-  // Para cambiar el sorteo sin tocar codigo, usa el Web App de Apps Script.
-  // La hoja puede quedar privada; la pagina solo lee el JSON del backend.
-  appsScriptApiUrl: "",
+  // La pagina lee datos por esta ruta interna de Vercel.
+  // La URL real de Apps Script vive en APPS_SCRIPT_API_URL dentro de Vercel.
+  assignmentsApiUrl: "/api/assignments",
   // Respaldo opcional por CSV publico. Dejalo vacio si quieres proteger la hoja.
   googleSheetCsvUrl: "",
   // Respaldo local. Cada registro asigna un participante a un pais por teamCode.

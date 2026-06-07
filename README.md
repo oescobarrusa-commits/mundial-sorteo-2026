@@ -26,9 +26,11 @@ Configura el backend:
 4. Despliega como Web App con:
    - Ejecutar como: `Yo`
    - Quien tiene acceso: `Cualquier persona`
-5. Copia la URL `/exec` del Web App y pegala en `appsScriptApiUrl` dentro de `data.js`.
+5. Copia la URL `/exec` del Web App.
+6. En Vercel, crea la variable de entorno `APPS_SCRIPT_API_URL` con esa URL.
+7. Redeploya el proyecto en Vercel.
 
-Despues de eso, edita solo las filas de Google Sheets. Al refrescar el sitio, se leeran los datos nuevos. La hoja puede quedar privada; los visitantes solo leen el JSON del Web App.
+Despues de eso, edita solo las filas de Google Sheets. Al refrescar el sitio, se leeran los datos nuevos. La hoja puede quedar privada; los visitantes solo leen `/api/assignments`, que llama al Web App desde Vercel.
 
 Detalles:
 
@@ -39,7 +41,7 @@ Detalles:
 - Un pais solo puede tener una asignacion.
 - Si la hoja esta vacia, el portal mostrara los paises como `Sin asignar`.
 
-`assignments` queda como respaldo local por si no se configura Apps Script. Antes del sorteo puede estar vacio:
+`assignments` queda como respaldo local por si no se configura `APPS_SCRIPT_API_URL`. Antes del sorteo puede estar vacio:
 
 ```js
 assignments: []

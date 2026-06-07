@@ -1050,8 +1050,8 @@
 
     async function loadExternalAssignments() {
       try {
-        const sheetData = data.appsScriptApiUrl
-          ? await loadAppsScriptData(data.appsScriptApiUrl)
+        const sheetData = data.assignmentsApiUrl
+          ? await loadAssignmentsApiData(data.assignmentsApiUrl)
           : await loadCsvData(data.googleSheetCsvUrl);
         if (!sheetData) return;
 
@@ -1065,11 +1065,11 @@
       }
     }
 
-    async function loadAppsScriptData(url) {
-      const endpoint = new URL(url);
+    async function loadAssignmentsApiData(url) {
+      const endpoint = new URL(url, window.location.origin);
       endpoint.searchParams.set("t", Date.now().toString());
       const response = await fetch(endpoint.toString(), { cache: "no-store" });
-      if (!response.ok) throw new Error("No se pudo leer Apps Script");
+      if (!response.ok) throw new Error("No se pudo leer asignaciones");
       const payload = await response.json();
       return normalizeExternalData(payload);
     }
