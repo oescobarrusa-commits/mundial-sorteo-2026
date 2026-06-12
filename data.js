@@ -76,7 +76,7 @@ const WORLD_CUP_DATA = {
     { number: 3, a: "CAN", b: "BIH", group: "B", date: "12 de junio", time: "13:00 h CDMX", venue: "Toronto Stadium" },
     { number: 4, a: "USA", b: "PAR", group: "D", date: "12 de junio", time: "19:00 h CDMX", venue: "Los Angeles Stadium" },
     { number: 5, a: "HAI", b: "SCO", group: "C", date: "13 de junio", time: "19:00 h CDMX", venue: "Boston Stadium" },
-    { number: 6, a: "AUS", b: "TUR", group: "D", date: "12 de junio", time: "22:00 h CDMX", venue: "Vancouver Stadium" },
+    { number: 6, a: "AUS", b: "TUR", group: "D", date: "13 de junio", time: "22:00 h CDMX", venue: "Vancouver Stadium" },
     { number: 7, a: "BRA", b: "MAR", group: "C", date: "13 de junio", time: "16:00 h CDMX", venue: "New York New Jersey Stadium" },
     { number: 8, a: "QAT", b: "SUI", group: "B", date: "13 de junio", time: "13:00 h CDMX", venue: "San Francisco Bay Area Stadium" },
     { number: 9, a: "CIV", b: "ECU", group: "E", date: "14 de junio", time: "17:00 h CDMX", venue: "Philadelphia Stadium" },
