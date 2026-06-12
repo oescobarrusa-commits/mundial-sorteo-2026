@@ -72,7 +72,7 @@ const WORLD_CUP_DATA = {
   assignments: [],
   matches: [
     { number: 1, a: "MEX", b: "ZAF", group: "A", date: "11 de junio", time: "13:00 h CDMX", venue: "Mexico City Stadium" },
-    { number: 2, a: "KOR", b: "CZE", group: "A", date: "12 de junio", time: "20:00 h CDMX", venue: "Guadalajara Stadium" },
+    { number: 2, a: "KOR", b: "CZE", group: "A", date: "11 de junio", time: "20:00 h CDMX", venue: "Guadalajara Stadium" },
     { number: 3, a: "CAN", b: "BIH", group: "B", date: "12 de junio", time: "13:00 h CDMX", venue: "Toronto Stadium" },
     { number: 4, a: "USA", b: "PAR", group: "D", date: "12 de junio", time: "19:00 h CDMX", venue: "Los Angeles Stadium" },
     { number: 5, a: "HAI", b: "SCO", group: "C", date: "13 de junio", time: "19:00 h CDMX", venue: "Boston Stadium" },

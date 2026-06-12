@@ -120,6 +120,13 @@
       align-items: start;
     }
 
+    .daily-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
     .panel,
     .headline-card,
     .assignment-card,
@@ -272,6 +279,84 @@
       color: var(--gold) !important;
       font-size: 20px !important;
       font-weight: 900 !important;
+    }
+
+    .match-teams {
+      display: grid;
+      gap: 20px;
+      margin-bottom: 18px;
+    }
+
+    .daily-flags-showdown {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      gap: 18px;
+      align-items: center;
+    }
+
+    .daily-team-panel {
+      display: grid;
+      justify-items: center;
+      gap: 8px;
+      min-width: 0;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #f8fbff;
+      color: var(--text);
+      text-align: center;
+    }
+
+    .daily-versus {
+      color: var(--blue);
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .daily-team-name {
+      color: var(--text) !important;
+      font-size: 28px !important;
+      font-weight: 900;
+      line-height: 1.05 !important;
+    }
+
+    .daily-team-flag {
+      flex: 0 0 auto;
+      font-size: clamp(128px, 18vw, 240px) !important;
+      line-height: 0.9 !important;
+    }
+
+    .match-team-owner {
+      color: var(--muted);
+      font-size: 15px !important;
+      font-weight: 700;
+      line-height: 1.25 !important;
+      text-align: center;
+    }
+
+    .match-comment {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      color: var(--blue) !important;
+      font-size: 15px !important;
+      font-weight: 800;
+    }
+
+    .daily-match-card {
+      grid-template-columns: 1fr;
+      align-items: start;
+      padding: 26px;
+    }
+
+    .daily-match-meta {
+      display: flex !important;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      margin-bottom: 16px;
+      color: var(--blue) !important;
+      font-size: 16px !important;
+      font-weight: 900;
     }
 
     .countries-header {
@@ -623,6 +708,7 @@
 
     @media (max-width: 1000px) {
       .participant-layout,
+      .daily-layout,
       .country-detail-grid {
         grid-template-columns: 1fr;
       }
@@ -657,6 +743,32 @@
         grid-template-columns: 1fr;
       }
 
+      .daily-match-card {
+        padding: 18px;
+      }
+
+      .daily-flags-showdown {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .daily-team-flag {
+        font-size: clamp(104px, 34vw, 170px) !important;
+      }
+
+      .daily-team-name {
+        font-size: 22px !important;
+      }
+
+      .match-team-owner {
+        text-align: left;
+      }
+
+      .daily-versus {
+        justify-self: center;
+      }
+
       .rival-owner {
         font-size: 18px !important;
       }
@@ -686,8 +798,9 @@
         <p class="subtitle">Portal para revisar participantes, países asignados y partidos de fase de grupos.</p>
       </div>
       <nav class="tabs" aria-label="Navegación principal">
-        <button class="tab active" type="button" data-screen="participants">Participantes</button>
         <button class="tab" type="button" data-screen="countries">Países</button>
+        <button class="tab active" type="button" data-screen="today">¿Quién juega hoy?</button>
+        <button class="tab" type="button" data-screen="participants">Participantes</button>
         <button class="tab" type="button" data-screen="bracket">Bracket</button>
         <button class="tab" type="button" data-screen="draw">Sorteo</button>
       </nav>
@@ -695,7 +808,7 @@
   </header>
 
   <main>
-    <section id="participants" class="screen active">
+    <section id="participants" class="screen">
       <div class="participant-layout">
         <aside class="panel">
           <label for="participantSelect">Buscar por participante</label>
@@ -718,6 +831,22 @@
       </div>
       <div id="countriesGrid" class="countries-grid"></div>
       <div id="countryDetail" class="country-detail"></div>
+    </section>
+
+    <section id="today" class="screen active">
+      <div class="daily-layout">
+        <aside class="panel">
+          <label for="matchDateSelect">Elegir fecha</label>
+          <select id="matchDateSelect"></select>
+        </aside>
+        <div>
+          <div class="headline-card">
+            <h2 id="todayHeadline">¿Quién juega hoy?</h2>
+            <p id="todaySummary">Partidos programados para la fecha seleccionada.</p>
+          </div>
+          <div id="todayMatches" class="match-list"></div>
+        </div>
+      </div>
     </section>
 
     <section id="bracket" class="screen">
@@ -797,11 +926,217 @@
       return match.a === code ? match.b : match.a;
     }
 
+    function getScheduleDates() {
+      return [...new Set(data.matches.map((match) => match.date))]
+        .sort((a, b) => parseMatchDate(a) - parseMatchDate(b));
+    }
+
+    function parseMatchDate(dateLabel) {
+      const day = Number((dateLabel.match(/\d+/) || ["0"])[0]);
+      return new Date(2026, 5, day);
+    }
+
+    function getMexicoTodayLabel() {
+      const parts = new Intl.DateTimeFormat("es-MX", {
+        day: "numeric",
+        month: "long",
+        timeZone: "America/Mexico_City"
+      }).formatToParts(new Date());
+      const day = parts.find((part) => part.type === "day")?.value || "";
+      const month = parts.find((part) => part.type === "month")?.value || "";
+      return `${day} de ${month}`.toLowerCase();
+    }
+
+    function getInitialScheduleDate() {
+      const dates = getScheduleDates();
+      const todayLabel = getMexicoTodayLabel();
+      const exactDate = dates.find((date) => date.toLowerCase() === todayLabel);
+      if (exactDate) return exactDate;
+
+      const todayValue = parseMatchDate(todayLabel);
+      const nextDate = dates.find((date) => parseMatchDate(date) >= todayValue);
+      return nextDate || dates[0] || "";
+    }
+
+    function initTodaySchedule() {
+      const select = document.getElementById("matchDateSelect");
+      const dates = getScheduleDates();
+      if (!dates.length) {
+        select.innerHTML = `<option value="">Sin fechas</option>`;
+        renderTodayMatches();
+        return;
+      }
+
+      const todayValue = parseMatchDate(getMexicoTodayLabel());
+      const availableDates = dates.filter((date) => parseMatchDate(date) >= todayValue);
+      const dateOptions = availableDates.length ? availableDates : dates;
+      select.innerHTML = dateOptions
+        .map((date) => `<option value="${date}">${date}</option>`)
+        .join("");
+      resetTodayScheduleDate();
+    }
+
+    function resetTodayScheduleDate() {
+      const select = document.getElementById("matchDateSelect");
+      if (!select.options.length) {
+        renderTodayMatches();
+        return;
+      }
+
+      const initialDate = getInitialScheduleDate();
+      const values = [...select.options].map((option) => option.value);
+      select.value = values.includes(initialDate) ? initialDate : values[0];
+      renderTodayMatches();
+    }
+
+    function renderTodayMatches() {
+      const select = document.getElementById("matchDateSelect");
+      const selectedDate = select.value;
+      const dayMatches = data.matches
+        .filter((match) => match.date === selectedDate)
+        .sort((a, b) => a.number - b.number);
+
+      document.getElementById("todayHeadline").textContent =
+        selectedDate ? `¿Quién juega el ${selectedDate}?` : "¿Quién juega hoy?";
+      document.getElementById("todaySummary").textContent = dayMatches.length
+        ? `${dayMatches.length} partido${dayMatches.length === 1 ? "" : "s"} programado${dayMatches.length === 1 ? "" : "s"} para esta fecha.`
+        : "No hay partidos programados para esta fecha.";
+
+      document.getElementById("todayMatches").innerHTML = dayMatches.length
+        ? dayMatches.map((match) => renderDailyMatch(match)).join("")
+        : `
+          <article class="assignment-card">
+            <div class="assignment-top">
+              <div class="flag">?</div>
+              <div>
+                <h3>Sin partidos</h3>
+              </div>
+            </div>
+          </article>
+        `;
+    }
+
+    function renderDailyMatch(match) {
+      const teamA = getTeam(match.a);
+      const teamB = getTeam(match.b);
+      const ownerA = getOwnerByTeam(match.a);
+      const ownerB = getOwnerByTeam(match.b);
+
+      return `
+        <article class="match-card daily-match-card">
+          <div class="daily-match-meta">
+            <span>${match.time}</span>
+            <span>${match.venue}</span>
+            <span>Grupo ${match.group} · Partido ${match.number}</span>
+          </div>
+          <div class="match-teams">
+            <div class="daily-flags-showdown">
+              <div class="daily-team-panel">
+                <span class="daily-team-flag">${teamA.flag}</span>
+                <strong class="daily-team-name">${teamA.displayName}</strong>
+                <span class="match-team-owner">${ownerA}</span>
+              </div>
+              <span class="daily-versus">VS</span>
+              <div class="daily-team-panel">
+                <span class="daily-team-flag">${teamB.flag}</span>
+                <strong class="daily-team-name">${teamB.displayName}</strong>
+                <span class="match-team-owner">${ownerB}</span>
+              </div>
+            </div>
+          </div>
+          <span class="match-comment">${getMatchComment(match)}</span>
+        </article>
+      `;
+    }
+
+    function getMatchComment(match) {
+      const comments = getUniqueDailyMatchComments();
+      return comments[match.number - 1] || "Partido de fase de grupos: todos dicen que vienen tranquilos, pero nadie quiere hacer cuentas cuando la tabla empieza a oler raro.";
+    }
+
+    function getUniqueDailyMatchComments() {
+      return [
+        "México estrena casa y presión nacional; Sudáfrica no vino a cortar listón, vino a correrle la alfombra al anfitrión.",
+        "Corea llega con pulmones de fábrica y Chequia con hambre atrasada; si esto se vuelve carrera, varios van a pedir cambio de deporte.",
+        "Canadá quiere fiesta ordenada en Toronto; Bosnia trae cicatrices, penales y pinta de invitado que rompe la bocina.",
+        "Estados Unidos tiene estadio, cámaras y presión premium; Paraguay solo necesita ensuciar el partido para convertir el show en trámite notarial.",
+        "Haití esperó décadas para volver y Escocia trae paciencia caducada; partido perfecto para que alguien confunda emoción con caos.",
+        "Australia aterriza con más millas que piernas frescas; Turquía sube el volumen y convierte cualquier despeje malo en incendio.",
+        "Brasil trae fantasía con etiqueta de favorito; Marruecos ya no es sorpresa y sabe apagar fiestas con cara seria.",
+        "Catar ya no juega con gafete de anfitrión y Suiza no regala ni una sonrisa; esto huele a ajedrez con tachones.",
+        "Costa de Marfil llega con físico de demoledora y Ecuador con ritmo incómodo; el mediocampo va a parecer frontera en quincena.",
+        "Alemania mira a Curazao como auditoría sencilla; peligroso, porque esos partidos son los que luego salen en compilados crueles.",
+        "Holanda quiere pintar bonito, Japón viene a castigar pestañeos; mucha naranja, mucho orden y cero margen para dormirse.",
+        "Suecia trae hielo en las venas y Túnez lodo en los zapatos; si el juego se pone feo, ambos parecen bastante cómodos.",
+        "Arabia Saudita ya sabe romper quinielas grandes; Uruguay no juega tibio, así que aquí nadie viene a intercambiar postales.",
+        "España quiere esconder la pelota y Cabo Verde quiere patear el guion; debutante chico, hambre grande, ego rival en peligro.",
+        "Irán llega con concentración de hotel-cancha-nervios; Nueva Zelanda no hace ruido, que suele ser la forma barata de empezar un susto.",
+        "Bélgica trae nombres bonitos y Egipto paciencia de estatua; si el partido se pone feo, el glamour belga empieza a sudar.",
+        "Francia dice que va tranquila y Senegal escucha con sonrisa de quien no compra humo europeo en oferta.",
+        "Irak llega curtido y Noruega con artillería; si el partido se abre, alguien va a necesitar casco y calculadora.",
+        "Argentina aparece con corona y Argelia con hambre vieja; el campeón no puede ni respirar sin que le pidan certificado.",
+        "Austria llega con cara de oficina seria y Jordania debuta con veneno discreto; huele a partido que nadie presume y todos sufren.",
+        "Ghana y Panamá traen velocidad, pierna y cero turismo; este partido puede ser hermoso o una persecución con uniforme.",
+        "Inglaterra trae talento premium y Croacia doctorado en sufrimiento; si huele a drama, ambos ya conocen la dirección.",
+        "Portugal llega con novela incluida y Congo con medio siglo de espera; mucho brillo contra mucha deuda emocional.",
+        "Uzbekistán debuta con cuchillo entre dientes y Colombia con fiesta nerviosa; el que se confíe termina pagando mariachi triste.",
+        "Chequia y Sudáfrica llegan con urgencias distintas; uno quiere recuperar años perdidos y el otro arruinar otra sobremesa.",
+        "Suiza parece banco cerrado y Bosnia trae ganzúa emocional; partido para perder paciencia antes que puntos.",
+        "Canadá presume localía, Catar ya sabe jugar sin invitación; duelo raro, como comida elegante donde todos esconden el cuchillo.",
+        "México contra Corea es ansiedad contra pulmones; si el Tri regala espacios, el chat familiar empieza juicio político.",
+        "Brasil contra Haití suena a trámite hasta que el Mundial recuerda que vive de burlarse del papel.",
+        "Escocia contra Marruecos trae choque físico y colmillo; nadie vino a ser amable, menos en un grupo apretado.",
+        "Turquía y Paraguay pueden convertir una tarde normal en pleito de vecindad: volumen alto contra candado oxidado.",
+        "Estados Unidos contra Australia trae localía contra jet lag; mucho estadio moderno, pero las piernas no leen comerciales.",
+        "Alemania contra Costa de Marfil es libreto contra martillo; si el plan alemán se moja, la tarde se vuelve pesada.",
+        "Ecuador y Curazao se miran como quien sabe que estos puntos valen más de lo que aparentan.",
+        "Holanda contra Suecia trae elegancia y hielo; partido para que el balón pida permiso antes de respirar.",
+        "Túnez contra Japón puede ser una trampa con moño: orden asiático contra barro norteafricano.",
+        "Uruguay contra Cabo Verde es casco contra debut; si el chico pestañea, la historia le cobra peaje.",
+        "España contra Arabia Saudita trae pase infinito contra memoria de gigante caído; la confianza aquí viene con veneno.",
+        "Bélgica contra Irán suena a talento contra tensión; un error y el partido cambia de perfume a expediente.",
+        "Nueva Zelanda contra Egipto promete poco ruido y mucho colmillo; esos juegos feos son los que dejan cicatriz.",
+        "Noruega contra Senegal trae potencia y serenidad; si se abre el partido, la defensa va a pedir vacaciones.",
+        "Francia contra Irak es candidato contra sobreviviente; el favorito trae banca de lujo, el otro trae callo de sobra.",
+        "Argentina contra Austria suena a campeón contra oficina seria; cuidado, que los trámites aburridos también eliminan sonrisas.",
+        "Jordania contra Argelia trae debut silencioso y hambre vieja; partido sin reflectores, justo donde nacen los sustos baratos.",
+        "Inglaterra contra Ghana es prensa ansiosa contra velocidad sin miedo; si Inglaterra duda, la isla entera hace autopsia.",
+        "Panamá contra Croacia trae hambre contra doctorado en alargar sufrimiento; si huele a cierre dramático, Croacia ya pidió mesa.",
+        "Portugal contra Uzbekistán enfrenta novela europea contra debut con descaro; el guion puede romperse con una barrida tonta.",
+        "Colombia contra Congo trae ritmo y espera histórica; si se parte el partido, la calculadora sale llorando.",
+        "Escocia contra Brasil suena a camiseta pesada contra piernas duras; si Brasil baila lento, Escocia le pisa la música.",
+        "Marruecos contra Haití es orgullo reciente contra regreso larguísimo; nadie debería llamarlo trámite sin seguro médico.",
+        "Suiza contra Canadá trae hielo por ambos lados; partido perfecto para que la emoción use abrigo.",
+        "Bosnia contra Catar huele a duelo de supervivencia; el que pierda empieza a negociar milagros con la tabla.",
+        "Chequia contra México trae hambre atrasada contra pánico local; cada mal pase mexicano va directo al tribunal familiar.",
+        "Sudáfrica contra Corea puede ser maratón con pelota; si alguien baja ritmo, lo dejan viendo placas.",
+        "Curazao contra Costa de Marfil es historia chica contra físico grande; el mapa no juega, pero las piernas sí.",
+        "Ecuador contra Alemania trae incomodidad contra auditoría; si Alemania se confía, Ecuador le llena el escritorio de problemas.",
+        "Japón contra Suecia es orden quirúrgico contra hielo nórdico; partido para que hasta el silencio tenga estrategia.",
+        "Túnez contra Holanda trae barro contra pintura; si Holanda quiere postal, Túnez le puede manchar el marco.",
+        "Turquía contra Estados Unidos trae volumen contra escaparate; si el show se distrae, Turquía le baja el switch.",
+        "Paraguay contra Australia es candado contra jet lag; partido para que la pelota pida café y abogado.",
+        "Noruega contra Francia trae artillería contra candidato; si Francia se relaja, Noruega le convierte la calma en alarma.",
+        "Senegal contra Irak trae serenidad física contra callo competitivo; nadie va a ganar esto con discursos bonitos.",
+        "Egipto contra Irán puede ser ajedrez con nervios; el primer error va a sonar como portazo en hotel.",
+        "Nueva Zelanda contra Bélgica es silencio contra promesa eterna; si Bélgica vuelve a vender humo, el meme llega puntual.",
+        "Cabo Verde contra Arabia Saudita trae debut sin miedo contra rompequinielas profesional; partido chico solo en cartel.",
+        "Uruguay contra España es casco contra rondo; si España toca demasiado, Uruguay le recuerda que el fútbol también raspa.",
+        "Panamá contra Inglaterra trae hambre contra trauma premium; si Inglaterra se complica, la prensa ya tiene cuchillo.",
+        "Croacia contra Ghana es sufrimiento administrado contra velocidad brava; partido para envejecer cinco años sin moverse.",
+        "Argelia contra Austria trae hambre vieja contra oficina seria; nadie lo presume, pero puede dejar moretones en la tabla.",
+        "Jordania contra Argentina enfrenta debut con descaro contra campeón vigilado; si Argentina pestañea, el mundo huele sangre.",
+        "Colombia contra Portugal trae fiesta nerviosa contra novela de lujo; demasiado talento para no terminar en pleito.",
+        "Congo contra Uzbekistán es espera histórica contra debut absoluto; alguien sale con puntos y otro con coartada."
+      ];
+    }
+
     function showScreen(screenId, button) {
       document.querySelectorAll(".screen").forEach((screen) => screen.classList.remove("active"));
       document.querySelectorAll(".tab").forEach((tab) => tab.classList.remove("active"));
       document.getElementById(screenId).classList.add("active");
       button.classList.add("active");
+      if (screenId === "today") resetTodayScheduleDate();
     }
 
     function initParticipantSelect() {
@@ -1188,6 +1523,7 @@
       refreshDerivedData();
       initParticipantSelect();
       renderCountryDashboard();
+      initTodaySchedule();
       renderCompletedBracket();
       initDrawVideo();
     }
@@ -1197,6 +1533,7 @@
     });
 
     document.getElementById("participantSelect").addEventListener("change", renderParticipantDetail);
+    document.getElementById("matchDateSelect").addEventListener("change", renderTodayMatches);
     document.getElementById("countriesGrid").addEventListener("click", (event) => {
       const button = event.target.closest(".country-tile");
       if (button) selectCountry(button.dataset.country);
