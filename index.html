@@ -658,7 +658,7 @@
 
     .quiniela-layout {
       display: grid;
-      grid-template-columns: minmax(280px, 380px) 1fr;
+      grid-template-columns: 1fr;
       gap: 24px;
       align-items: start;
     }
@@ -1079,12 +1079,6 @@
 
     <section id="quiniela" class="screen">
       <div class="quiniela-layout">
-        <aside class="panel">
-          <div class="quiniela-access-title">Acceso por enlace único</div>
-          <div id="quinielaCodeSummary" class="quiniela-status">Abre tu enlace personalizado para cargar tu participación.</div>
-          <p class="note">El enlace debe incluir tu código, por ejemplo <strong>?code=ABC123</strong>. Cada código solo se puede confirmar una vez.</p>
-        </aside>
-
         <div>
           <div class="headline-card">
             <h2>La Quiniela de los 8</h2>
@@ -1095,7 +1089,8 @@
             <div class="quiniela-status">Abre tu enlace único para cargar tu participación.</div>
           </div>
 
-          <div class="countries-header" style="margin-top: 22px;">
+          <div id="quinielaDashboardSection">
+            <div class="countries-header" style="margin-top: 22px;">
             <h2>Quinielas confirmadas</h2>
             <p>Dashboard público con las selecciones que ya fueron registradas.</p>
             <div class="quiniela-dashboard-tools">
@@ -1111,8 +1106,9 @@
               </div>
             </div>
           </div>
-          <div id="quinielaPopularPicks" class="quiniela-popular-grid"></div>
-          <div id="quinielaDashboard" class="quiniela-dashboard-grid"></div>
+            <div id="quinielaPopularPicks" class="quiniela-popular-grid"></div>
+            <div id="quinielaDashboard" class="quiniela-dashboard-grid"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -1403,17 +1399,22 @@
     async function initQuiniela() {
       const code = getQuinielaCodeFromUrl();
       const button = document.querySelector('[data-screen="quiniela"]');
+      setQuinielaCodeMode(Boolean(code));
       if (code) {
         renderQuinielaAccessState(code);
         showScreen("quiniela", button);
         await validateQuinielaCode(code);
       } else {
         renderQuinielaAccessState("");
-        renderQuinielaMessage("No encontramos código en la URL. Abre tu enlace único con formato ?code=ABC123 para participar.", true);
+        renderQuinielaMessage("Abre tu enlace único con código para registrar tu quiniela. Mientras tanto puedes revisar las quinielas confirmadas.");
       }
 
       initQuinielaDashboardFilters();
       await loadQuinielaDashboard();
+    }
+
+    function setQuinielaCodeMode(hasCode) {
+      document.getElementById("quinielaDashboardSection").classList.toggle("hidden", hasCode);
     }
 
     function renderQuinielaAccessState(code) {
@@ -2111,6 +2112,13 @@
     }
 
     async function initApp() {
+      const quinielaCode = getQuinielaCodeFromUrl();
+      if (quinielaCode) {
+        showScreen("quiniela", document.querySelector('[data-screen="quiniela"]'));
+        renderQuinielaAccessState(quinielaCode);
+        renderQuinielaMessage("Validando código...");
+      }
+
       await loadExternalAssignments();
       refreshDerivedData();
       initParticipantSelect();
