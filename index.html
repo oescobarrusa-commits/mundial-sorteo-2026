@@ -656,6 +656,198 @@
       display: block;
     }
 
+    .quiniela-layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 380px) 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .quiniela-code-box {
+      display: grid;
+      gap: 12px;
+    }
+
+    .text-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .primary-button,
+    .secondary-button {
+      border: 0;
+      border-radius: 8px;
+      padding: 13px 16px;
+      cursor: pointer;
+      font-weight: 900;
+    }
+
+    .primary-button {
+      background: var(--gold);
+      color: #fff;
+    }
+
+    .primary-button:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+
+    .secondary-button {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+    }
+
+    .quiniela-form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .pick-field {
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+    }
+
+    .pick-field label {
+      margin-bottom: 8px;
+    }
+
+    .quiniela-status {
+      margin-bottom: 18px;
+      padding: 16px;
+      border: 1px solid rgba(0, 120, 255, 0.24);
+      border-radius: 8px;
+      background: rgba(0, 120, 255, 0.08);
+      color: var(--blue);
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
+    .quiniela-error {
+      border-color: rgba(215, 25, 32, 0.28);
+      background: rgba(215, 25, 32, 0.08);
+      color: #9f1016;
+    }
+
+    .picks-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .pick-pill {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      font-weight: 800;
+    }
+
+    .pick-pill span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .quiniela-dashboard-grid {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .quiniela-dashboard-tools,
+    .quiniela-popular-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .quiniela-popular-grid {
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    }
+
+    .popular-pick {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      font-weight: 900;
+    }
+
+    .popular-pick span:last-child {
+      color: var(--gold);
+    }
+
+    .quiniela-entry {
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .quiniela-entry h3 {
+      margin-bottom: 6px;
+    }
+
+    .quiniela-entry-meta {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .quiniela-entry-picks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .quiniela-entry-picks span {
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .confirmation-panel {
+      margin-top: 18px;
+      padding: 18px;
+      border: 1px solid rgba(0, 91, 153, 0.24);
+      border-radius: 8px;
+      background: #f7fbff;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
     .footer-note {
       margin-top: 24px;
       color: var(--muted);
@@ -709,6 +901,7 @@
     @media (max-width: 1000px) {
       .participant-layout,
       .daily-layout,
+      .quiniela-layout,
       .country-detail-grid {
         grid-template-columns: 1fr;
       }
@@ -740,6 +933,14 @@
       }
 
       .match-card {
+        grid-template-columns: 1fr;
+      }
+
+      .quiniela-form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .quiniela-dashboard-tools {
         grid-template-columns: 1fr;
       }
 
@@ -802,6 +1003,7 @@
         <button class="tab active" type="button" data-screen="today">¿Quién juega hoy?</button>
         <button class="tab" type="button" data-screen="participants">Participantes</button>
         <button class="tab" type="button" data-screen="bracket">Bracket</button>
+        <button class="tab" type="button" data-screen="quiniela">Quiniela de los 8</button>
         <button class="tab" type="button" data-screen="draw">Sorteo</button>
       </nav>
     </div>
@@ -857,6 +1059,49 @@
       </div>
     </section>
 
+    <section id="quiniela" class="screen">
+      <div class="quiniela-layout">
+        <aside class="panel">
+          <label for="quinielaCodeInput">Código de participación</label>
+          <div class="quiniela-code-box">
+            <input id="quinielaCodeInput" class="text-input" type="text" placeholder="ABC123" autocomplete="off">
+            <button id="validateQuinielaButton" class="primary-button" type="button">Validar código</button>
+          </div>
+          <p class="note">Usa tu enlace único con formato <strong>?code=ABC123</strong>. Cada código solo se puede confirmar una vez.</p>
+        </aside>
+
+        <div>
+          <div class="headline-card">
+            <h2>La Quiniela de los 8</h2>
+            <p>Elige las 8 selecciones que crees que llegarán a cuartos de final. Esta dinámica es independiente del sorteo principal.</p>
+          </div>
+
+          <div id="quinielaWorkspace" class="assignment-card">
+            <div class="quiniela-status">Ingresa tu código o abre tu enlace único para cargar tu participación.</div>
+          </div>
+
+          <div class="countries-header" style="margin-top: 22px;">
+            <h2>Quinielas confirmadas</h2>
+            <p>Dashboard público con las selecciones que ya fueron registradas.</p>
+            <div class="quiniela-dashboard-tools">
+              <div>
+                <label for="quinielaSearchInput">Buscar por participante</label>
+                <input id="quinielaSearchInput" class="text-input" type="search" placeholder="Nombre">
+              </div>
+              <div>
+                <label for="quinielaTeamFilter">Filtrar por selección</label>
+                <select id="quinielaTeamFilter">
+                  <option value="">Todas las selecciones</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div id="quinielaPopularPicks" class="quiniela-popular-grid"></div>
+          <div id="quinielaDashboard" class="quiniela-dashboard-grid"></div>
+        </div>
+      </div>
+    </section>
+
     <section id="draw" class="screen">
       <div class="draw-panel">
         <h2>Repetición del sorteo</h2>
@@ -892,6 +1137,9 @@
     let uniqueParticipants = [];
 
     let selectedCountryCode = "";
+    let quinielaEntry = null;
+    let quinielaCurrentPicks = [];
+    let quinielaDashboardEntries = [];
 
     function refreshDerivedData() {
       teams = new Map(data.countries.map((item) => [item.code, item]));
@@ -1129,6 +1377,334 @@
         "Colombia contra Portugal trae fiesta nerviosa contra novela de lujo; demasiado talento para no terminar en pleito.",
         "Congo contra Uzbekistán es espera histórica contra debut absoluto; alguien sale con puntos y otro con coartada."
       ];
+    }
+
+    function getQuinielaCodeFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const pathMatch = window.location.pathname.match(/^\/quiniela\/([^/]+)\/?$/);
+      return (params.get("code") || params.get("quiniela") || pathMatch?.[1] || "").trim().toUpperCase();
+    }
+
+    async function initQuiniela() {
+      const code = getQuinielaCodeFromUrl();
+      const button = document.querySelector('[data-screen="quiniela"]');
+      if (code) {
+        document.getElementById("quinielaCodeInput").value = code;
+        showScreen("quiniela", button);
+        await validateQuinielaCode(code);
+      }
+
+      initQuinielaDashboardFilters();
+      await loadQuinielaDashboard();
+    }
+
+    async function validateQuinielaFromInput() {
+      const code = document.getElementById("quinielaCodeInput").value.trim().toUpperCase();
+      if (!code) {
+        renderQuinielaMessage("Ingresa tu código de participación.", true);
+        return;
+      }
+
+      await validateQuinielaCode(code);
+    }
+
+    async function validateQuinielaCode(code) {
+      renderQuinielaMessage("Validando código...");
+      try {
+        const endpoint = new URL("/api/quiniela", window.location.origin);
+        endpoint.searchParams.set("action", "validateQuinielaCode");
+        endpoint.searchParams.set("code", code);
+        endpoint.searchParams.set("t", Date.now().toString());
+        const response = await fetch(endpoint.toString(), { cache: "no-store" });
+        const payload = await response.json();
+
+        if (!response.ok || !payload.ok) {
+          quinielaEntry = null;
+          renderQuinielaMessage(payload.error || "Código no válido. Revisa tu enlace o contacta al organizador.", true);
+          return;
+        }
+
+        quinielaEntry = payload;
+        if (payload.alreadySubmitted) {
+          renderQuinielaReadOnly(payload);
+        } else {
+          renderQuinielaForm(payload);
+        }
+      } catch (error) {
+        quinielaEntry = null;
+        renderQuinielaMessage("No se pudo validar el código. Intenta de nuevo.", true);
+      }
+    }
+
+    function renderQuinielaMessage(message, isError = false) {
+      document.getElementById("quinielaWorkspace").innerHTML = `
+        <div class="quiniela-status ${isError ? "quiniela-error" : ""}">${escapeHtml(message)}</div>
+      `;
+    }
+
+    function renderQuinielaForm(entry) {
+      quinielaCurrentPicks = Array(8).fill("");
+      document.getElementById("quinielaWorkspace").innerHTML = `
+        <div class="quiniela-status">
+          Hola, ${escapeHtml(entry.participantName)}. Esta es tu participación #${escapeHtml(String(entry.ticketNumber || ""))}.
+          ${entry.mainTeamName ? `<br>Equipo del sorteo principal: ${escapeHtml(entry.mainTeamName)}` : ""}
+        </div>
+        <div class="quiniela-form-grid">
+          ${Array.from({ length: 8 }, (_, index) => renderPickField(index)).join("")}
+        </div>
+        <div id="quinielaValidationMessage" class="note"></div>
+        <div class="button-row">
+          <button id="showQuinielaConfirmationButton" class="primary-button" type="button" disabled>Confirmar quiniela</button>
+        </div>
+        <div id="quinielaConfirmationPanel" class="confirmation-panel hidden"></div>
+      `;
+
+      document.querySelectorAll(".quiniela-pick-select").forEach((select) => {
+        select.addEventListener("change", handleQuinielaPickChange);
+      });
+      document.getElementById("showQuinielaConfirmationButton").addEventListener("click", showQuinielaConfirmation);
+      updateQuinielaFormState();
+    }
+
+    function renderPickField(index) {
+      return `
+        <div class="pick-field">
+          <label for="quinielaPick${index}">Lugar ${index + 1}</label>
+          <select id="quinielaPick${index}" class="quiniela-pick-select" data-index="${index}">
+            <option value="">Selecciona equipo</option>
+            ${data.countries.map((team) => `
+              <option value="${team.code}">${team.flag} ${escapeHtml(team.displayName)}</option>
+            `).join("")}
+          </select>
+        </div>
+      `;
+    }
+
+    function handleQuinielaPickChange(event) {
+      const index = Number(event.target.dataset.index);
+      quinielaCurrentPicks[index] = event.target.value;
+      updateQuinielaFormState();
+    }
+
+    function updateQuinielaFormState() {
+      const selectedCodes = quinielaCurrentPicks.filter(Boolean);
+      const hasDuplicates = new Set(selectedCodes).size !== selectedCodes.length;
+      const isComplete = quinielaCurrentPicks.every(Boolean) && !hasDuplicates;
+      const message = document.getElementById("quinielaValidationMessage");
+      const button = document.getElementById("showQuinielaConfirmationButton");
+
+      document.querySelectorAll(".quiniela-pick-select").forEach((select) => {
+        const currentValue = select.value;
+        [...select.options].forEach((option) => {
+          option.disabled = Boolean(option.value) && option.value !== currentValue && selectedCodes.includes(option.value);
+        });
+      });
+
+      message.textContent = hasDuplicates
+        ? "No puedes repetir selección. Elige 8 equipos diferentes."
+        : isComplete
+          ? "Listo. Revisa tus 8 selecciones antes de confirmar."
+          : "Elige 8 selecciones diferentes para habilitar la confirmación.";
+      button.disabled = !isComplete;
+      document.getElementById("quinielaConfirmationPanel").classList.add("hidden");
+    }
+
+    function getSelectedQuinielaPicks() {
+      return quinielaCurrentPicks.map((code) => {
+        const team = getTeam(code);
+        return {
+          code,
+          name: team.displayName
+        };
+      });
+    }
+
+    function showQuinielaConfirmation() {
+      const picks = getSelectedQuinielaPicks();
+      const panel = document.getElementById("quinielaConfirmationPanel");
+      panel.classList.remove("hidden");
+      panel.innerHTML = `
+        <h3>Revisa bien tus elecciones</h3>
+        <p class="note">Una vez confirmadas, no podrás cambiarlas.</p>
+        <div class="picks-list">
+          ${picks.map((pick, index) => renderPickPill(pick, index)).join("")}
+        </div>
+        <div class="button-row">
+          <button id="editQuinielaButton" class="secondary-button" type="button">Regresar y editar</button>
+          <button id="saveQuinielaButton" class="primary-button" type="button">Confirmar definitivamente</button>
+        </div>
+      `;
+      document.getElementById("editQuinielaButton").addEventListener("click", () => panel.classList.add("hidden"));
+      document.getElementById("saveQuinielaButton").addEventListener("click", saveQuinielaPicks);
+    }
+
+    async function saveQuinielaPicks() {
+      if (!quinielaEntry) return;
+      const button = document.getElementById("saveQuinielaButton");
+      button.disabled = true;
+      button.textContent = "Guardando...";
+
+      try {
+        const response = await fetch("/api/quiniela", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            action: "saveQuinielaPicks",
+            code: quinielaEntry.code,
+            picks: getSelectedQuinielaPicks()
+          })
+        });
+        const payload = await response.json();
+
+        if (!response.ok || !payload.ok) {
+          if (payload.alreadySubmitted) {
+            renderQuinielaReadOnly({ ...quinielaEntry, alreadySubmitted: true, picks: payload.picks || [] });
+            await loadQuinielaDashboard();
+            return;
+          }
+          throw new Error(payload.error || "No se pudo guardar la quiniela.");
+        }
+
+        renderQuinielaReadOnly({
+          ...quinielaEntry,
+          alreadySubmitted: true,
+          picks: payload.picks || getSelectedQuinielaPicks()
+        }, "Tu quiniela quedó registrada correctamente. Ya no podrás modificarla.");
+        await loadQuinielaDashboard();
+      } catch (error) {
+        const panel = document.getElementById("quinielaConfirmationPanel");
+        panel.insertAdjacentHTML("afterbegin", `<div class="quiniela-status quiniela-error">${escapeHtml(error.message)}</div>`);
+        button.disabled = false;
+        button.textContent = "Confirmar definitivamente";
+      }
+    }
+
+    function renderQuinielaReadOnly(entry, message = "") {
+      const picks = Array.isArray(entry.picks) ? entry.picks : [];
+      document.getElementById("quinielaWorkspace").innerHTML = `
+        <div class="quiniela-status">
+          ${message ? escapeHtml(message) : "Tu quiniela ya fue registrada."}
+          <br>Estas fueron tus 8 selecciones. Ya no se pueden modificar.
+          <br>Participación #${escapeHtml(String(entry.ticketNumber || ""))}
+          ${entry.mainTeamName ? `<br>Equipo del sorteo principal: ${escapeHtml(entry.mainTeamName)}` : ""}
+        </div>
+        <div class="picks-list">
+          ${picks.map((pick, index) => renderPickPill(pick, index)).join("")}
+        </div>
+      `;
+    }
+
+    function renderPickPill(pick, index) {
+      const team = getTeam(pick.code);
+      return `
+        <div class="pick-pill">
+          <strong>${index + 1}. ${team ? team.flag : ""} ${escapeHtml(pick.name || pick.code)}</strong>
+          <span>${escapeHtml(pick.code)}</span>
+        </div>
+      `;
+    }
+
+    async function loadQuinielaDashboard() {
+      const dashboard = document.getElementById("quinielaDashboard");
+      const popular = document.getElementById("quinielaPopularPicks");
+      dashboard.innerHTML = `<div class="quiniela-status">Cargando quinielas confirmadas...</div>`;
+      popular.innerHTML = "";
+      try {
+        const endpoint = new URL("/api/quiniela", window.location.origin);
+        endpoint.searchParams.set("action", "getQuinielaDashboard");
+        endpoint.searchParams.set("t", Date.now().toString());
+        const response = await fetch(endpoint.toString(), { cache: "no-store" });
+        const payload = await response.json();
+        quinielaDashboardEntries = Array.isArray(payload.entries) ? payload.entries : [];
+
+        renderQuinielaDashboard();
+      } catch (error) {
+        dashboard.innerHTML = `<div class="quiniela-status quiniela-error">No se pudo cargar el dashboard de quinielas.</div>`;
+      }
+    }
+
+    function initQuinielaDashboardFilters() {
+      const teamFilter = document.getElementById("quinielaTeamFilter");
+      teamFilter.innerHTML = `
+        <option value="">Todas las selecciones</option>
+        ${data.countries.map((team) => `<option value="${team.code}">${team.flag} ${escapeHtml(team.displayName)}</option>`).join("")}
+      `;
+      document.getElementById("quinielaSearchInput").addEventListener("input", renderQuinielaDashboard);
+      teamFilter.addEventListener("change", renderQuinielaDashboard);
+    }
+
+    function renderQuinielaDashboard() {
+      const dashboard = document.getElementById("quinielaDashboard");
+      const popular = document.getElementById("quinielaPopularPicks");
+      const searchTerm = document.getElementById("quinielaSearchInput").value.trim().toLowerCase();
+      const teamCode = document.getElementById("quinielaTeamFilter").value;
+      const filteredEntries = quinielaDashboardEntries.filter((entry) => {
+        const nameMatches = !searchTerm || String(entry.participantName || "").toLowerCase().includes(searchTerm);
+        const teamMatches = !teamCode || (entry.picks || []).some((pick) => pick.code === teamCode);
+        return nameMatches && teamMatches;
+      });
+
+      popular.innerHTML = renderPopularPicks(quinielaDashboardEntries);
+      dashboard.innerHTML = filteredEntries.length
+        ? filteredEntries.map((entry) => renderQuinielaDashboardEntry(entry)).join("")
+        : `<div class="quiniela-status">No hay quinielas confirmadas con esos filtros.</div>`;
+    }
+
+    function renderPopularPicks(entries) {
+      const counts = new Map();
+      entries.forEach((entry) => {
+        (entry.picks || []).forEach((pick) => {
+          const team = getTeam(pick.code);
+          const name = team ? team.displayName : pick.name || pick.code;
+          const flag = team ? team.flag : "";
+          const current = counts.get(pick.code) || { code: pick.code, name, flag, count: 0 };
+          current.count += 1;
+          counts.set(pick.code, current);
+        });
+      });
+
+      const popular = [...counts.values()]
+        .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "es"))
+        .slice(0, 8);
+
+      if (!popular.length) return "";
+
+      return popular.map((item) => `
+        <div class="popular-pick">
+          <span>${item.flag} ${escapeHtml(item.name)}</span>
+          <span>${item.count}</span>
+        </div>
+      `).join("");
+    }
+
+    function renderQuinielaDashboardEntry(entry) {
+      return `
+        <article class="quiniela-entry">
+          <h3>${escapeHtml(entry.participantName || "Participante")}</h3>
+          <p class="quiniela-entry-meta">
+            Participación #${escapeHtml(String(entry.ticketNumber || ""))}
+            ${entry.mainTeamName ? ` · Equipo del sorteo: ${escapeHtml(entry.mainTeamName)}` : ""}
+            ${entry.timestamp ? ` · ${escapeHtml(entry.timestamp)}` : ""}
+          </p>
+          <div class="quiniela-entry-picks">
+            ${(entry.picks || []).map((pick) => {
+              const team = getTeam(pick.code);
+              return `<span>${team ? team.flag : ""} ${escapeHtml(pick.name || pick.code)}</span>`;
+            }).join("")}
+          </div>
+        </article>
+      `;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
 
     function showScreen(screenId, button) {
@@ -1526,6 +2102,7 @@
       initTodaySchedule();
       renderCompletedBracket();
       initDrawVideo();
+      await initQuiniela();
     }
 
     document.querySelectorAll(".tab").forEach((button) => {
@@ -1534,6 +2111,10 @@
 
     document.getElementById("participantSelect").addEventListener("change", renderParticipantDetail);
     document.getElementById("matchDateSelect").addEventListener("change", renderTodayMatches);
+    document.getElementById("validateQuinielaButton").addEventListener("click", validateQuinielaFromInput);
+    document.getElementById("quinielaCodeInput").addEventListener("keydown", (event) => {
+      if (event.key === "Enter") validateQuinielaFromInput();
+    });
     document.getElementById("countriesGrid").addEventListener("click", (event) => {
       const button = event.target.closest(".country-tile");
       if (button) selectCountry(button.dataset.country);

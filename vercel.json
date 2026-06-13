@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/quiniela",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/quiniela/:code",
+      "destination": "/index.html"
+    }
+  ]
+}

@@ -1,8 +1,14 @@
 const SHEET_ID = "1w3zvGkTrGO6jSyOIpb5xBotha0OnxwA9tV4XCxHJjKU";
 const SHEET_NAME = "participantes";
 const BRACKET_SHEET_NAME = "bracket";
+const QUINIELA_CODES_SHEET_NAME = "ParticipacionesQuiniela";
+const QUINIELA_RESPONSES_SHEET_NAME = "QuinielaRespuestas";
 
-function doGet() {
+function doGet(e) {
+  const action = String(e?.parameter?.action || "").trim();
+  if (action === "validateQuinielaCode") return jsonResponse(validateQuinielaCode(e.parameter.code));
+  if (action === "getQuinielaDashboard") return jsonResponse(getQuinielaDashboard());
+
   const sheet = getSheet();
   const values = sheet.getDataRange().getDisplayValues();
   const rows = values
@@ -20,9 +26,28 @@ function doGet() {
     bracket: getBracket()
   };
 
+  return jsonResponse(payload);
+}
+
+function doPost(e) {
+  const payload = parseJsonBody(e);
+  const action = String(payload.action || e?.parameter?.action || "").trim();
+  if (action === "saveQuinielaPicks") return jsonResponse(saveQuinielaPicks(payload));
+  return jsonResponse({ ok: false, error: "Acción no válida." });
+}
+
+function jsonResponse(payload) {
   return ContentService
     .createTextOutput(JSON.stringify(payload))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function parseJsonBody(e) {
+  try {
+    return JSON.parse(e?.postData?.contents || "{}");
+  } catch (error) {
+    return {};
+  }
 }
 
 function getSheet() {
@@ -85,6 +110,261 @@ function getBracketRoundConfigs() {
     { name: "Semifinal", headers: ["semifinal", "semifinales", "semifinals"] },
     { name: "Final", headers: ["final"] }
   ];
+}
+
+function validateQuinielaCode(code) {
+  const normalizedCode = normalizeCode(code);
+  const entry = getQuinielaParticipationByCode(normalizedCode);
+  if (!entry) return { ok: false, error: "Código no válido. Revisa tu enlace o contacta al organizador." };
+
+  const existing = getQuinielaResponseByCode(normalizedCode);
+  return {
+    ok: true,
+    ...entry,
+    alreadySubmitted: Boolean(existing),
+    picks: existing ? existing.picks : []
+  };
+}
+
+function saveQuinielaPicks(payload) {
+  const normalizedCode = normalizeCode(payload.code);
+  const entry = getQuinielaParticipationByCode(normalizedCode);
+  if (!entry) return { ok: false, error: "Código no válido. Revisa tu enlace o contacta al organizador." };
+
+  const existing = getQuinielaResponseByCode(normalizedCode);
+  if (existing) {
+    return {
+      ok: false,
+      alreadySubmitted: true,
+      error: "Esta quiniela ya fue registrada y no se puede modificar.",
+      picks: existing.picks
+    };
+  }
+
+  const picks = normalizePicks(payload.picks);
+  const validationError = validatePicks(picks);
+  if (validationError) return { ok: false, error: validationError };
+
+  const sheet = getOrCreateSheet(QUINIELA_RESPONSES_SHEET_NAME, getQuinielaResponseHeaders());
+  sheet.appendRow([
+    Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd HH:mm:ss"),
+    entry.code,
+    entry.participantName,
+    entry.ticketNumber,
+    ...picks.flatMap((pick) => [pick.code, pick.name]),
+    "CONFIRMED"
+  ]);
+
+  return {
+    ok: true,
+    message: "Quiniela registrada correctamente.",
+    picks
+  };
+}
+
+function getQuinielaDashboard() {
+  const sheet = getSheetIfExists(QUINIELA_RESPONSES_SHEET_NAME);
+  if (!sheet) return { ok: true, entries: [] };
+
+  const values = sheet.getDataRange().getDisplayValues();
+  if (values.length < 2) return { ok: true, entries: [] };
+
+  const headers = values[0].map((header) => normalizeHeader(header));
+  const entries = values.slice(1)
+    .filter((row) => row.some((cell) => String(cell).trim()))
+    .map((row) => {
+      const code = normalizeCode(getValueByHeader(row, headers, ["code"]));
+      const participation = getQuinielaParticipationByCode(code);
+      const picks = [];
+      for (let index = 1; index <= 8; index += 1) {
+        const pickCode = normalizeCode(getValueByHeader(row, headers, [`pick${index}code`]));
+        const name = getValueByHeader(row, headers, [`pick${index}name`]);
+        if (pickCode || name) picks.push({ code: pickCode, name });
+      }
+
+      return {
+        timestamp: getValueByHeader(row, headers, ["timestamp"]),
+        participantName: getValueByHeader(row, headers, ["participantname", "name"]),
+        ticketNumber: getValueByHeader(row, headers, ["ticketnumber"]),
+        mainTeamCode: participation ? participation.mainTeamCode : "",
+        mainTeamName: participation ? participation.mainTeamName : "",
+        status: getValueByHeader(row, headers, ["status"]),
+        picks
+      };
+    })
+    .filter((entry) => entry.participantName && String(entry.status).trim().toUpperCase() === "CONFIRMED");
+
+  return { ok: true, entries };
+}
+
+function getQuinielaParticipationByCode(code) {
+  const sheet = getSheetIfExists(QUINIELA_CODES_SHEET_NAME);
+  if (!sheet || !code) return null;
+
+  const values = sheet.getDataRange().getDisplayValues();
+  if (values.length < 2) return null;
+
+  const headers = values[0].map((header) => normalizeHeader(header));
+  const row = values.slice(1).find((item) => normalizeCode(getValueByHeader(item, headers, ["code"])) === code);
+  if (!row) return null;
+
+  const isActiveValue = getValueByHeader(row, headers, ["isactive", "active"]);
+  const isActive = !isActiveValue || ["true", "si", "sí", "yes", "1"].includes(String(isActiveValue).trim().toLowerCase());
+  if (!isActive) return null;
+
+  const mainTeamCode = normalizeCode(getValueByHeader(row, headers, ["mainteamcode", "teamcode"]));
+  const mainTeamName = getValueByHeader(row, headers, ["mainteamname", "teamname"]) || getOfficialTeamMap()[mainTeamCode] || "";
+
+  return {
+    code,
+    participantName: getValueByHeader(row, headers, ["participantname", "name"]),
+    ticketNumber: getValueByHeader(row, headers, ["ticketnumber", "ticket"]),
+    mainTeamCode,
+    mainTeamName
+  };
+}
+
+function getQuinielaResponseByCode(code) {
+  const sheet = getSheetIfExists(QUINIELA_RESPONSES_SHEET_NAME);
+  if (!sheet || !code) return null;
+
+  const values = sheet.getDataRange().getDisplayValues();
+  if (values.length < 2) return null;
+
+  const headers = values[0].map((header) => normalizeHeader(header));
+  const row = values.slice(1).find((item) => normalizeCode(getValueByHeader(item, headers, ["code"])) === code);
+  if (!row) return null;
+
+  const picks = [];
+  for (let index = 1; index <= 8; index += 1) {
+    const pickCode = normalizeCode(getValueByHeader(row, headers, [`pick${index}code`]));
+    const pickName = getValueByHeader(row, headers, [`pick${index}name`]);
+    if (pickCode) picks.push({ code: pickCode, name: pickName });
+  }
+
+  return { picks };
+}
+
+function normalizePicks(picks) {
+  return Array.isArray(picks)
+    ? picks.map((pick) => {
+      const code = normalizeCode(typeof pick === "string" ? pick : pick.code);
+      const team = getOfficialTeamMap()[code];
+      return {
+        code,
+        name: team || String(pick.name || "").trim()
+      };
+    })
+    : [];
+}
+
+function validatePicks(picks) {
+  if (picks.length !== 8) return "Debes elegir exactamente 8 selecciones.";
+  const teamMap = getOfficialTeamMap();
+  const codes = picks.map((pick) => pick.code);
+  if (codes.some((code) => !teamMap[code])) return "Todas las selecciones deben existir en el listado oficial.";
+  if (new Set(codes).size !== 8) return "No puedes repetir selección. Elige 8 equipos diferentes.";
+  return "";
+}
+
+function getSheetIfExists(sheetName) {
+  return SpreadsheetApp.openById(SHEET_ID).getSheetByName(sheetName);
+}
+
+function getOrCreateSheet(sheetName, headers) {
+  const spreadsheet = SpreadsheetApp.openById(SHEET_ID);
+  let sheet = spreadsheet.getSheetByName(sheetName);
+  if (!sheet) sheet = spreadsheet.insertSheet(sheetName);
+  if (sheet.getLastRow() === 0) sheet.appendRow(headers);
+  return sheet;
+}
+
+function getValueByHeader(row, headers, headerCandidates) {
+  const index = headers.findIndex((header) => headerCandidates.includes(header));
+  return index === -1 ? "" : String(row[index] || "").trim();
+}
+
+function normalizeCode(value) {
+  return String(value || "").trim().toUpperCase();
+}
+
+function getQuinielaResponseHeaders() {
+  return [
+    "timestamp",
+    "code",
+    "participantName",
+    "ticketNumber",
+    "pick1Code",
+    "pick1Name",
+    "pick2Code",
+    "pick2Name",
+    "pick3Code",
+    "pick3Name",
+    "pick4Code",
+    "pick4Name",
+    "pick5Code",
+    "pick5Name",
+    "pick6Code",
+    "pick6Name",
+    "pick7Code",
+    "pick7Name",
+    "pick8Code",
+    "pick8Name",
+    "status"
+  ];
+}
+
+function getOfficialTeamMap() {
+  return {
+    MEX: "México",
+    ZAF: "Sudáfrica",
+    KOR: "Corea del Sur",
+    CZE: "Republica Checa",
+    CAN: "Canadá",
+    BIH: "Bosnia y Herzegovina",
+    QAT: "Catar",
+    SUI: "Suiza",
+    BRA: "Brasil",
+    MAR: "Marruecos",
+    HAI: "Haití",
+    SCO: "Escocia",
+    USA: "Estados Unidos",
+    PAR: "Paraguay",
+    AUS: "Australia",
+    TUR: "Turquía",
+    GER: "Alemania",
+    CUW: "Curazao",
+    CIV: "Costa de Marfil",
+    ECU: "Ecuador",
+    NED: "Holanda",
+    JPN: "Japón",
+    SWE: "Suecia",
+    TUN: "Túnez",
+    BEL: "Bélgica",
+    EGY: "Egipto",
+    IRN: "Irán",
+    NZL: "Nueva Zelanda",
+    ESP: "España",
+    CPV: "Cabo Verde",
+    KSA: "Arabia Saudita",
+    URU: "Uruguay",
+    FRA: "Francia",
+    SEN: "Senegal",
+    IRQ: "Irak",
+    NOR: "Noruega",
+    ARG: "Argentina",
+    ALG: "Argelia",
+    AUT: "Austria",
+    JOR: "Jordania",
+    POR: "Portugal",
+    COD: "Congo",
+    UZB: "Uzbekistán",
+    COL: "Colombia",
+    ENG: "Inglaterra",
+    CRO: "Croacia",
+    GHA: "Ghana",
+    PAN: "Panamá"
+  };
 }
 
 function isHeaderRow(row) {
