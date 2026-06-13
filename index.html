@@ -668,6 +668,24 @@
       gap: 12px;
     }
 
+    .quiniela-access-title {
+      margin-bottom: 10px;
+      color: var(--navy);
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .quiniela-code-chip {
+      display: inline-flex;
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: var(--navy);
+      color: #fff;
+      font-size: 14px;
+      letter-spacing: 0.08em;
+    }
+
     .text-input {
       width: 100%;
       padding: 14px 16px;
@@ -1062,12 +1080,9 @@
     <section id="quiniela" class="screen">
       <div class="quiniela-layout">
         <aside class="panel">
-          <label for="quinielaCodeInput">Código de participación</label>
-          <div class="quiniela-code-box">
-            <input id="quinielaCodeInput" class="text-input" type="text" placeholder="ABC123" autocomplete="off">
-            <button id="validateQuinielaButton" class="primary-button" type="button">Validar código</button>
-          </div>
-          <p class="note">Usa tu enlace único con formato <strong>?code=ABC123</strong>. Cada código solo se puede confirmar una vez.</p>
+          <div class="quiniela-access-title">Acceso por enlace único</div>
+          <div id="quinielaCodeSummary" class="quiniela-status">Abre tu enlace personalizado para cargar tu participación.</div>
+          <p class="note">El enlace debe incluir tu código, por ejemplo <strong>?code=ABC123</strong>. Cada código solo se puede confirmar una vez.</p>
         </aside>
 
         <div>
@@ -1077,7 +1092,7 @@
           </div>
 
           <div id="quinielaWorkspace" class="assignment-card">
-            <div class="quiniela-status">Ingresa tu código o abre tu enlace único para cargar tu participación.</div>
+            <div class="quiniela-status">Abre tu enlace único para cargar tu participación.</div>
           </div>
 
           <div class="countries-header" style="margin-top: 22px;">
@@ -1389,23 +1404,24 @@
       const code = getQuinielaCodeFromUrl();
       const button = document.querySelector('[data-screen="quiniela"]');
       if (code) {
-        document.getElementById("quinielaCodeInput").value = code;
+        renderQuinielaAccessState(code);
         showScreen("quiniela", button);
         await validateQuinielaCode(code);
+      } else {
+        renderQuinielaAccessState("");
+        renderQuinielaMessage("No encontramos código en la URL. Abre tu enlace único con formato ?code=ABC123 para participar.", true);
       }
 
       initQuinielaDashboardFilters();
       await loadQuinielaDashboard();
     }
 
-    async function validateQuinielaFromInput() {
-      const code = document.getElementById("quinielaCodeInput").value.trim().toUpperCase();
-      if (!code) {
-        renderQuinielaMessage("Ingresa tu código de participación.", true);
-        return;
-      }
-
-      await validateQuinielaCode(code);
+    function renderQuinielaAccessState(code) {
+      const summary = document.getElementById("quinielaCodeSummary");
+      if (!summary) return;
+      summary.innerHTML = code
+        ? `Código detectado<br><span class="quiniela-code-chip">${escapeHtml(code)}</span>`
+        : "No se detectó código en la URL.";
     }
 
     async function validateQuinielaCode(code) {
@@ -2111,10 +2127,6 @@
 
     document.getElementById("participantSelect").addEventListener("change", renderParticipantDetail);
     document.getElementById("matchDateSelect").addEventListener("change", renderTodayMatches);
-    document.getElementById("validateQuinielaButton").addEventListener("click", validateQuinielaFromInput);
-    document.getElementById("quinielaCodeInput").addEventListener("keydown", (event) => {
-      if (event.key === "Enter") validateQuinielaFromInput();
-    });
     document.getElementById("countriesGrid").addEventListener("click", (event) => {
       const button = event.target.closest(".country-tile");
       if (button) selectCountry(button.dataset.country);
