@@ -1089,7 +1089,7 @@
           <div id="quinielaDashboardSection">
             <div class="countries-header" style="margin-top: 22px;">
               <h2>Quinielas confirmadas</h2>
-              <p>Dashboard público con las selecciones que ya fueron registradas.</p>
+              <p>Las participaciones se mantienen privadas hasta que todas hayan sido completadas.</p>
             </div>
             <div id="quinielaDashboard" class="quiniela-dashboard-grid"></div>
           </div>
@@ -1663,9 +1663,17 @@
       const dashboard = document.getElementById("quinielaDashboard");
       if (!dashboard) return;
 
-      dashboard.innerHTML = quinielaDashboardEntries.length
-        ? quinielaDashboardEntries.map((entry) => renderQuinielaDashboardEntry(entry)).join("")
-        : `<div class="quiniela-status">No hay quinielas confirmadas todavía.</div>`;
+      if (!quinielaDashboardEntries.length) {
+        dashboard.innerHTML = `<div class="quiniela-status">No hay quinielas confirmadas todavía.</div>`;
+        return;
+      }
+
+      dashboard.innerHTML = `
+        <div class="quiniela-status">
+          Ya ${quinielaDashboardEntries.length === 1 ? "hay 1 quiniela confirmada" : `hay ${quinielaDashboardEntries.length} quinielas confirmadas`}.
+          Las selecciones se mostrarán cuando todas las quinielas hayan sido completadas.
+        </div>
+      `;
     }
 
     function renderQuinielaDashboardEntry(entry) {
