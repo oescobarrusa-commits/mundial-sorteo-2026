@@ -1383,22 +1383,23 @@
     async function initQuiniela() {
       const code = getQuinielaCodeFromUrl();
       const button = document.querySelector('[data-screen="quiniela"]');
-      setQuinielaCodeMode(Boolean(code));
-      if (code) {
+      const hasSpecificCode = Boolean(code) && code !== "ALL";
+      setQuinielaCodeMode(hasSpecificCode);
+      if (hasSpecificCode) {
         renderQuinielaAccessState(code);
         showScreen("quiniela", button);
         await validateQuinielaCode(code);
       } else {
         renderQuinielaAccessState("");
-        renderQuinielaMessage("Abre tu enlace único con código para registrar tu quiniela. Mientras tanto puedes revisar las quinielas confirmadas.");
       }
 
       initQuinielaDashboardFilters();
       await loadQuinielaDashboard();
     }
 
-    function setQuinielaCodeMode(hasCode) {
-      document.getElementById("quinielaDashboardSection")?.classList.toggle("hidden", hasCode);
+    function setQuinielaCodeMode(hasSpecificCode) {
+      document.getElementById("quinielaWorkspace")?.classList.toggle("hidden", !hasSpecificCode);
+      document.getElementById("quinielaDashboardSection")?.classList.toggle("hidden", hasSpecificCode);
     }
 
     function renderQuinielaAccessState(code) {
@@ -1568,13 +1569,9 @@
           throw new Error(payload.error || "No se pudo guardar la quiniela.");
         }
 
-        renderQuinielaReadOnly({
-          ...quinielaEntry,
-          alreadySubmitted: true,
-          picks: payload.picks || getSelectedQuinielaPicks()
-        }, "Tu quiniela quedó registrada correctamente. Ya no podrás modificarla.");
         celebrateQuinielaSave();
-        clearQuinielaCodeFromUrl();
+        setQuinielaPublicUrl();
+        quinielaEntry = null;
         setQuinielaCodeMode(false);
         await loadQuinielaDashboard();
       } catch (error) {
@@ -1609,9 +1606,9 @@
       `;
     }
 
-    function clearQuinielaCodeFromUrl() {
+    function setQuinielaPublicUrl() {
       const url = new URL(window.location.href);
-      url.searchParams.delete("code");
+      url.searchParams.set("code", "all");
       url.searchParams.delete("quiniela");
       window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
     }
@@ -2091,8 +2088,10 @@
       const quinielaCode = getQuinielaCodeFromUrl();
       if (quinielaCode) {
         showScreen("quiniela", document.querySelector('[data-screen="quiniela"]'));
-        renderQuinielaAccessState(quinielaCode);
-        renderQuinielaMessage("Validando código...");
+        if (quinielaCode !== "ALL") {
+          renderQuinielaAccessState(quinielaCode);
+          renderQuinielaMessage("Validando código...");
+        }
       }
 
       await loadExternalAssignments();
