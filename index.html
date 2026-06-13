@@ -1089,6 +1089,14 @@
             <div class="quiniela-status">Abre tu enlace único para cargar tu participación.</div>
           </div>
 
+          <div id="quinielaDashboardSection">
+            <div class="countries-header" style="margin-top: 22px;">
+              <h2>Quinielas confirmadas</h2>
+              <p>Dashboard público con las selecciones que ya fueron registradas.</p>
+            </div>
+            <div id="quinielaPopularPicks" class="quiniela-popular-grid"></div>
+            <div id="quinielaDashboard" class="quiniela-dashboard-grid"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -1624,35 +1632,18 @@
     }
 
     function initQuinielaDashboardFilters() {
-      const teamFilter = document.getElementById("quinielaTeamFilter");
-      const searchInput = document.getElementById("quinielaSearchInput");
-      if (!teamFilter || !searchInput) return;
-      teamFilter.innerHTML = `
-        <option value="">Todas las selecciones</option>
-        ${data.countries.map((team) => `<option value="${team.code}">${team.flag} ${escapeHtml(team.displayName)}</option>`).join("")}
-      `;
-      searchInput.addEventListener("input", renderQuinielaDashboard);
-      teamFilter.addEventListener("change", renderQuinielaDashboard);
+      return;
     }
 
     function renderQuinielaDashboard() {
       const dashboard = document.getElementById("quinielaDashboard");
       const popular = document.getElementById("quinielaPopularPicks");
-      const searchInput = document.getElementById("quinielaSearchInput");
-      const teamFilter = document.getElementById("quinielaTeamFilter");
-      if (!dashboard || !popular || !searchInput || !teamFilter) return;
-      const searchTerm = searchInput.value.trim().toLowerCase();
-      const teamCode = teamFilter.value;
-      const filteredEntries = quinielaDashboardEntries.filter((entry) => {
-        const nameMatches = !searchTerm || String(entry.participantName || "").toLowerCase().includes(searchTerm);
-        const teamMatches = !teamCode || (entry.picks || []).some((pick) => pick.code === teamCode);
-        return nameMatches && teamMatches;
-      });
+      if (!dashboard || !popular) return;
 
       popular.innerHTML = renderPopularPicks(quinielaDashboardEntries);
-      dashboard.innerHTML = filteredEntries.length
-        ? filteredEntries.map((entry) => renderQuinielaDashboardEntry(entry)).join("")
-        : `<div class="quiniela-status">No hay quinielas confirmadas con esos filtros.</div>`;
+      dashboard.innerHTML = quinielaDashboardEntries.length
+        ? quinielaDashboardEntries.map((entry) => renderQuinielaDashboardEntry(entry)).join("")
+        : `<div class="quiniela-status">No hay quinielas confirmadas todavía.</div>`;
     }
 
     function renderPopularPicks(entries) {
