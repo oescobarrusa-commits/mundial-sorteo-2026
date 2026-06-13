@@ -121,7 +121,8 @@ function validateQuinielaCode(code) {
   return {
     ok: true,
     ...entry,
-    alreadySubmitted: Boolean(existing),
+    alreadySubmitted: existing ? existing.isLocked : false,
+    canEdit: existing ? !existing.isLocked : true,
     picks: existing ? existing.picks : []
   };
 }
@@ -132,7 +133,7 @@ function saveQuinielaPicks(payload) {
   if (!entry) return { ok: false, error: "Código no válido. Revisa tu enlace o contacta al organizador." };
 
   const existing = getQuinielaResponseByCode(normalizedCode);
-  if (existing) {
+  if (existing && existing.isLocked) {
     return {
       ok: false,
       alreadySubmitted: true,
@@ -146,14 +147,20 @@ function saveQuinielaPicks(payload) {
   if (validationError) return { ok: false, error: validationError };
 
   const sheet = getOrCreateSheet(QUINIELA_RESPONSES_SHEET_NAME, getQuinielaResponseHeaders());
-  sheet.appendRow([
+  const rowValues = [
     Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd HH:mm:ss"),
     entry.code,
     entry.participantName,
     entry.ticketNumber,
     ...picks.flatMap((pick) => [pick.code, pick.name]),
     "CONFIRMED"
-  ]);
+  ];
+
+  if (existing && existing.rowNumber) {
+    sheet.getRange(existing.rowNumber, 1, 1, rowValues.length).setValues([rowValues]);
+  } else {
+    sheet.appendRow(rowValues);
+  }
 
   return {
     ok: true,
@@ -232,7 +239,10 @@ function getQuinielaResponseByCode(code) {
   if (values.length < 2) return null;
 
   const headers = values[0].map((header) => normalizeHeader(header));
-  const row = values.slice(1).find((item) => normalizeCode(getValueByHeader(item, headers, ["code"])) === code);
+  const rowIndex = values.slice(1).findIndex((item) => normalizeCode(getValueByHeader(item, headers, ["code"])) === code);
+  if (rowIndex === -1) return null;
+
+  const row = values[rowIndex + 1];
   if (!row) return null;
 
   const picks = [];
@@ -242,7 +252,13 @@ function getQuinielaResponseByCode(code) {
     if (pickCode) picks.push({ code: pickCode, name: pickName });
   }
 
-  return { picks };
+  const status = getValueByHeader(row, headers, ["status"]);
+  return {
+    rowNumber: rowIndex + 2,
+    status,
+    isLocked: Boolean(String(status).trim()),
+    picks
+  };
 }
 
 function normalizePicks(picks) {

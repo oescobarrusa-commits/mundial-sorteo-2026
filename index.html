@@ -1445,10 +1445,11 @@
     }
 
     function renderQuinielaForm(entry) {
-      quinielaCurrentPicks = Array(8).fill("");
+      const existingPicks = Array.isArray(entry.picks) ? entry.picks.map((pick) => pick.code).filter(Boolean).slice(0, 8) : [];
+      quinielaCurrentPicks = Array.from({ length: 8 }, (_, index) => existingPicks[index] || "");
       document.getElementById("quinielaWorkspace").innerHTML = `
         <div class="quiniela-status">
-          Hola, ${escapeHtml(entry.participantName)}. Elige tus 8 selecciones.
+          Hola, ${escapeHtml(entry.participantName)}. ${existingPicks.length ? "Tu quiniela fue reabierta; revisa o ajusta tus 8 selecciones." : "Elige tus 8 selecciones."}
           ${entry.mainTeamName ? `<br>Equipo del sorteo principal: ${escapeHtml(entry.mainTeamName)}` : ""}
         </div>
         <div class="quiniela-form-grid">
@@ -1475,7 +1476,7 @@
           <select id="quinielaPick${index}" class="quiniela-pick-select" data-index="${index}">
             <option value="">Selecciona equipo</option>
             ${data.countries.map((team) => `
-              <option value="${team.code}">${team.flag} ${escapeHtml(team.displayName)}</option>
+              <option value="${team.code}" ${quinielaCurrentPicks[index] === team.code ? "selected" : ""}>${team.flag} ${escapeHtml(team.displayName)}</option>
             `).join("")}
           </select>
         </div>
