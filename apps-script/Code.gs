@@ -112,6 +112,19 @@ function getBracketRoundConfigs() {
   ];
 }
 
+function getQuinielaPickCategoryCodes() {
+  return [
+    ["MEX", "CAN", "BRA", "USA", "GER", "NED", "BEL", "ESP", "FRA", "ARG", "POR", "ENG"],
+    ["ZAF", "KOR", "BIH", "QAT", "MAR", "HAI", "PAR", "AUS", "CUW", "CIV", "JPN", "SWE", "EGY", "IRN", "CPV", "KSA", "SEN", "IRQ", "ALG", "AUT", "COD", "UZB", "CRO", "GHA"],
+    ["ZAF", "KOR", "BIH", "QAT", "MAR", "HAI", "PAR", "AUS", "CUW", "CIV", "JPN", "SWE", "EGY", "IRN", "CPV", "KSA", "SEN", "IRQ", "ALG", "AUT", "COD", "UZB", "CRO", "GHA"],
+    ["ZAF", "KOR", "BIH", "QAT", "MAR", "HAI", "PAR", "AUS", "CUW", "CIV", "JPN", "SWE", "EGY", "IRN", "CPV", "KSA", "SEN", "IRQ", "ALG", "AUT", "COD", "UZB", "CRO", "GHA"],
+    ["ZAF", "KOR", "BIH", "QAT", "MAR", "HAI", "PAR", "AUS", "CUW", "CIV", "JPN", "SWE", "EGY", "IRN", "CPV", "KSA", "SEN", "IRQ", "ALG", "AUT", "COD", "UZB", "CRO", "GHA"],
+    ["CZE", "SUI", "SCO", "TUR", "ECU", "TUN", "NZL", "URU", "NOR", "JOR", "COL", "PAN"],
+    ["CZE", "SUI", "SCO", "TUR", "ECU", "TUN", "NZL", "URU", "NOR", "JOR", "COL", "PAN"],
+    ["CZE", "SUI", "SCO", "TUR", "ECU", "TUN", "NZL", "URU", "NOR", "JOR", "COL", "PAN"]
+  ];
+}
+
 function validateQuinielaCode(code) {
   const normalizedCode = normalizeCode(code);
   const entry = getQuinielaParticipationByCode(normalizedCode);
@@ -275,11 +288,14 @@ function normalizePicks(picks) {
 }
 
 function validatePicks(picks) {
-  if (picks.length !== 8) return "Debes elegir exactamente 8 selecciones.";
+  const categoryError = "La quiniela no cumple con las categorías requeridas.";
+  if (picks.length !== 8) return categoryError;
   const teamMap = getOfficialTeamMap();
   const codes = picks.map((pick) => pick.code);
-  if (codes.some((code) => !teamMap[code])) return "Todas las selecciones deben existir en el listado oficial.";
-  if (new Set(codes).size !== 8) return "No puedes repetir selección. Elige 8 equipos diferentes.";
+  if (codes.some((code) => !teamMap[code])) return categoryError;
+  if (new Set(codes).size !== 8) return categoryError;
+  const categoryCodes = getQuinielaPickCategoryCodes();
+  if (codes.some((code, index) => !categoryCodes[index].includes(code))) return categoryError;
   return "";
 }
 

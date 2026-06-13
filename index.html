@@ -1135,6 +1135,16 @@
     let quinielaEntry = null;
     let quinielaCurrentPicks = [];
     let quinielaDashboardEntries = [];
+    const QUINIELA_PICK_CONFIG = [
+      { label: "Cabeza de serie", category: "seed", codes: ["MEX", "CAN", "BRA", "USA", "GER", "NED", "BEL", "ESP", "FRA", "ARG", "POR", "ENG"] },
+      { label: "Equipo fuerte 1", category: "strong", codes: ["ZAF", "KOR", "BIH", "QAT", "MAR", "HAI", "PAR", "AUS", "CUW", "CIV", "JPN", "SWE", "EGY", "IRN", "CPV", "KSA", "SEN", "IRQ", "ALG", "AUT", "COD", "UZB", "CRO", "GHA"] },
+      { label: "Equipo fuerte 2", category: "strong", codes: ["ZAF", "KOR", "BIH", "QAT", "MAR", "HAI", "PAR", "AUS", "CUW", "CIV", "JPN", "SWE", "EGY", "IRN", "CPV", "KSA", "SEN", "IRQ", "ALG", "AUT", "COD", "UZB", "CRO", "GHA"] },
+      { label: "Equipo fuerte 3", category: "strong", codes: ["ZAF", "KOR", "BIH", "QAT", "MAR", "HAI", "PAR", "AUS", "CUW", "CIV", "JPN", "SWE", "EGY", "IRN", "CPV", "KSA", "SEN", "IRQ", "ALG", "AUT", "COD", "UZB", "CRO", "GHA"] },
+      { label: "Equipo fuerte 4", category: "strong", codes: ["ZAF", "KOR", "BIH", "QAT", "MAR", "HAI", "PAR", "AUS", "CUW", "CIV", "JPN", "SWE", "EGY", "IRN", "CPV", "KSA", "SEN", "IRQ", "ALG", "AUT", "COD", "UZB", "CRO", "GHA"] },
+      { label: "Caballo negro 1", category: "darkHorse", codes: ["CZE", "SUI", "SCO", "TUR", "ECU", "TUN", "NZL", "URU", "NOR", "JOR", "COL", "PAN"] },
+      { label: "Caballo negro 2", category: "darkHorse", codes: ["CZE", "SUI", "SCO", "TUR", "ECU", "TUN", "NZL", "URU", "NOR", "JOR", "COL", "PAN"] },
+      { label: "Caballo negro 3", category: "darkHorse", codes: ["CZE", "SUI", "SCO", "TUR", "ECU", "TUN", "NZL", "URU", "NOR", "JOR", "COL", "PAN"] }
+    ];
 
     function refreshDerivedData() {
       teams = new Map(data.countries.map((item) => [item.code, item]));
@@ -1446,14 +1456,19 @@
 
     function renderQuinielaForm(entry) {
       const existingPicks = Array.isArray(entry.picks) ? entry.picks.map((pick) => pick.code).filter(Boolean).slice(0, 8) : [];
-      quinielaCurrentPicks = Array.from({ length: 8 }, (_, index) => existingPicks[index] || "");
+      quinielaCurrentPicks = QUINIELA_PICK_CONFIG.map((config, index) => {
+        const code = existingPicks[index] || "";
+        return config.codes.includes(code) ? code : "";
+      });
       document.getElementById("quinielaWorkspace").innerHTML = `
         <div class="quiniela-status">
           Hola, ${escapeHtml(entry.participantName)}. ${existingPicks.length ? "Tu quiniela fue reabierta; revisa o ajusta tus 8 selecciones." : "Elige tus 8 selecciones."}
+          <br>Para hacer la quiniela más pareja y divertida, deberás elegir 1 cabeza de serie, 4 equipos fuertes y 3 caballos negros.
+          <br>No todos pueden ser favoritos. En los Mundiales siempre hay sorpresas.
           ${entry.mainTeamName ? `<br>Equipo del sorteo principal: ${escapeHtml(entry.mainTeamName)}` : ""}
         </div>
         <div class="quiniela-form-grid">
-          ${Array.from({ length: 8 }, (_, index) => renderPickField(index)).join("")}
+          ${QUINIELA_PICK_CONFIG.map((config, index) => renderPickField(config, index)).join("")}
         </div>
         <div id="quinielaValidationMessage" class="note"></div>
         <div class="button-row">
@@ -1469,18 +1484,23 @@
       updateQuinielaFormState();
     }
 
-    function renderPickField(index) {
+    function renderPickField(config, index) {
       return `
         <div class="pick-field">
-          <label for="quinielaPick${index}">Lugar ${index + 1}</label>
+          <label for="quinielaPick${index}">${escapeHtml(config.label)}</label>
           <select id="quinielaPick${index}" class="quiniela-pick-select" data-index="${index}">
             <option value="">Selecciona equipo</option>
-            ${data.countries.map((team) => `
-              <option value="${team.code}" ${quinielaCurrentPicks[index] === team.code ? "selected" : ""}>${team.flag} ${escapeHtml(team.displayName)}</option>
+            ${config.codes.map((code) => `
+              <option value="${code}" ${quinielaCurrentPicks[index] === code ? "selected" : ""}>${escapeHtml(getQuinielaTeamLabel(code))}</option>
             `).join("")}
           </select>
         </div>
       `;
+    }
+
+    function getQuinielaTeamLabel(code) {
+      const team = getTeam(code);
+      return team ? `${team.flag ? `${team.flag} ` : ""}${team.displayName}` : code;
     }
 
     function handleQuinielaPickChange(event) {
@@ -1492,7 +1512,10 @@
     function updateQuinielaFormState() {
       const selectedCodes = quinielaCurrentPicks.filter(Boolean);
       const hasDuplicates = new Set(selectedCodes).size !== selectedCodes.length;
-      const isComplete = quinielaCurrentPicks.every(Boolean) && !hasDuplicates;
+      const hasInvalidCategory = quinielaCurrentPicks.some((code, index) =>
+        Boolean(code) && !QUINIELA_PICK_CONFIG[index].codes.includes(code)
+      );
+      const isComplete = quinielaCurrentPicks.every(Boolean) && !hasDuplicates && !hasInvalidCategory;
       const message = document.getElementById("quinielaValidationMessage");
       const button = document.getElementById("showQuinielaConfirmationButton");
 
@@ -1505,9 +1528,11 @@
 
       message.textContent = hasDuplicates
         ? "No puedes repetir selección. Elige 8 equipos diferentes."
-        : isComplete
-          ? "Listo. Revisa tus 8 selecciones antes de confirmar."
-          : "Elige 8 selecciones diferentes para habilitar la confirmación.";
+        : hasInvalidCategory
+          ? "La quiniela no cumple con las categorías requeridas."
+          : isComplete
+            ? "Listo. Revisa tus 8 selecciones antes de confirmar."
+            : "Elige 1 cabeza de serie, 4 equipos fuertes y 3 caballos negros para habilitar la confirmación.";
       button.disabled = !isComplete;
       document.getElementById("quinielaConfirmationPanel").classList.add("hidden");
     }
