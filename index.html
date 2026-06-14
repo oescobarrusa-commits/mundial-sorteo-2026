@@ -795,6 +795,12 @@
       margin-top: 18px;
     }
 
+    .quiniela-mobile-scroll-hint {
+      display: none;
+      margin-top: 8px;
+      font-weight: 800;
+    }
+
     .quiniela-standings-wrap {
       overflow-x: auto;
       border: 1px solid var(--border);
@@ -845,6 +851,15 @@
     .quiniela-standings-total {
       color: var(--blue);
       text-align: right;
+    }
+
+    .quiniela-section-title {
+      margin: 8px 0 12px;
+      color: var(--text);
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
     }
 
     .quiniela-standings-toolbar {
@@ -1020,6 +1035,10 @@
         grid-template-columns: 1fr;
       }
 
+      .quiniela-mobile-scroll-hint {
+        display: block;
+      }
+
       .daily-match-card {
         padding: 18px;
       }
@@ -1138,7 +1157,7 @@
     <section id="quiniela" class="screen">
       <div class="quiniela-layout">
         <div>
-          <div class="headline-card">
+          <div id="quinielaIntro" class="headline-card">
             <h2>La Quiniela de los 8</h2>
             <p>Elige las 8 selecciones que crees que llegarán a cuartos de final. Esta dinámica es independiente del sorteo principal.</p>
           </div>
@@ -1150,6 +1169,7 @@
           <div id="quinielaDashboardSection">
             <div class="countries-header" style="margin-top: 22px;">
               <h2>Quinielas confirmadas</h2>
+              <p class="quiniela-mobile-scroll-hint">En móvil, deslízate a la derecha para ver completa la tabla de la quiniela. →</p>
             </div>
             <div id="quinielaDashboard" class="quiniela-dashboard-grid"></div>
           </div>
@@ -1194,6 +1214,7 @@
     let selectedCountryCode = "";
     let quinielaEntry = null;
     let quinielaCurrentPicks = [];
+    let quinielaDashboardEntries = [];
     let quinielaPointsByTeam = {};
     let quinielaPointsWarning = "";
     const QUINIELA_STANDINGS_COLUMNS = [
@@ -1485,6 +1506,7 @@
     }
 
     function setQuinielaCodeMode(hasSpecificCode) {
+      document.getElementById("quinielaIntro")?.classList.toggle("hidden", !hasSpecificCode);
       document.getElementById("quinielaWorkspace")?.classList.toggle("hidden", !hasSpecificCode);
       document.getElementById("quinielaDashboardSection")?.classList.toggle("hidden", hasSpecificCode);
     }
@@ -1743,16 +1765,26 @@
     async function loadQuinielaDashboard() {
       const dashboard = document.getElementById("quinielaDashboard");
       if (!dashboard) return;
-      dashboard.innerHTML = `<div class="quiniela-status">Cargando puntos...</div>`;
+      dashboard.innerHTML = `<div class="quiniela-status">Cargando quiniela...</div>`;
       try {
-        quinielaPointsByTeam = await loadQuinielaPoints();
         quinielaPointsWarning = "";
+        const [pointsByTeam, dashboardPayload] = await Promise.all([
+          loadQuinielaPoints().catch(() => {
+            quinielaPointsWarning = "No se pudieron cargar los puntos actualizados.";
+            return {};
+          }),
+          fetchQuinielaAction("getQuinielaDashboard")
+        ]);
+
+        quinielaPointsByTeam = pointsByTeam;
+        quinielaDashboardEntries = Array.isArray(dashboardPayload.entries) ? dashboardPayload.entries : [];
         logQuinielaPointDiagnostics("render", quinielaPointsByTeam);
 
         renderQuinielaDashboard();
       } catch (error) {
         quinielaPointsByTeam = {};
-        quinielaPointsWarning = "No se pudieron cargar los puntos actualizados.";
+        quinielaDashboardEntries = [];
+        quinielaPointsWarning = "No se pudo cargar la quiniela.";
         renderQuinielaDashboard();
       }
     }
@@ -1800,7 +1832,22 @@
 
       dashboard.innerHTML = `
         ${quinielaPointsWarning ? `<div class="note">${escapeHtml(quinielaPointsWarning)}</div>` : ""}
+        ${renderQuinielaResponses()}
+        <h3 class="quiniela-section-title">TABLA GENERAL</h3>
         ${renderQuinielaStandings()}
+      `;
+    }
+
+    function renderQuinielaResponses() {
+      if (!quinielaDashboardEntries.length) {
+        return `<div class="quiniela-status">No hay quinielas confirmadas todavía.</div>`;
+      }
+
+      return `
+        <h3 class="quiniela-section-title">Quinielas ingresadas</h3>
+        <div class="quiniela-dashboard-grid">
+          ${quinielaDashboardEntries.map((entry) => renderQuinielaDashboardEntry(entry)).join("")}
+        </div>
       `;
     }
 
