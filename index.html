@@ -795,10 +795,9 @@
       margin-top: 18px;
     }
 
-    .quiniela-mobile-scroll-hint {
+    .quiniela-mobile-scroll-section {
       display: none;
-      margin-top: 8px;
-      font-weight: 800;
+      margin: 18px 0 12px;
     }
 
     .quiniela-standings-wrap {
@@ -1035,7 +1034,7 @@
         grid-template-columns: 1fr;
       }
 
-      .quiniela-mobile-scroll-hint {
+      .quiniela-mobile-scroll-section {
         display: block;
       }
 
@@ -1833,7 +1832,9 @@
         ${quinielaPointsWarning ? `<div class="note">${escapeHtml(quinielaPointsWarning)}</div>` : ""}
         ${renderQuinielaResponses()}
         <h3 class="quiniela-section-title">TABLA GENERAL</h3>
-        <p class="quiniela-mobile-scroll-hint">En móvil, deslízate a la derecha para ver completa la tabla de la quiniela. →</p>
+        <div class="countries-header quiniela-mobile-scroll-section">
+          <p>En móvil, deslízate a la derecha para ver completa la tabla de la quiniela. →</p>
+        </div>
         ${renderQuinielaStandings()}
       `;
     }
