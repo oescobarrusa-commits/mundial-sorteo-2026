@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sorteo Mundial 2026</title>
   <script src="data.js"></script>
+  <script src="quinielaOrdenada.js"></script>
   <style>
     :root {
       --bg: #eaf0fa;
@@ -794,6 +795,66 @@
       margin-top: 18px;
     }
 
+    .quiniela-standings-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    .quiniela-standings {
+      width: 100%;
+      min-width: 1320px;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .quiniela-standings th,
+    .quiniela-standings td {
+      padding: 9px 8px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .quiniela-standings th {
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .quiniela-standings tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .quiniela-standings-team {
+      min-width: 56px;
+      text-align: center;
+    }
+
+    .quiniela-team-label,
+    .quiniela-standings-priority,
+    .quiniela-standings-total {
+      font-weight: 900;
+    }
+
+    .quiniela-standings-total {
+      color: var(--blue);
+      text-align: right;
+    }
+
+    .quiniela-standings-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+      margin: 0 0 12px;
+    }
+
     .quiniela-entry {
       padding: 18px;
       border: 1px solid var(--border);
@@ -1134,7 +1195,26 @@
     let selectedCountryCode = "";
     let quinielaEntry = null;
     let quinielaCurrentPicks = [];
-    let quinielaDashboardEntries = [];
+    let quinielaPointsByTeam = {};
+    let quinielaPointsWarning = "";
+    const QUINIELA_POINTS_CACHE_KEY = "quinielaPoints:v1";
+    const QUINIELA_POINTS_CACHE_MS = 5 * 60 * 1000;
+    const QUINIELA_STANDINGS_COLUMNS = [
+      "Cabeza de Serie",
+      "Selección 1",
+      "Selección 2",
+      "Selección 3",
+      "Selección 4",
+      "Selección 5",
+      "Selección 6",
+      "Selección 7",
+      "Selección 8",
+      "Selección 9",
+      "Selección 10",
+      "Selección 11",
+      "Selección 12",
+      "Selección 13"
+    ];
     const QUINIELA_PICK_CONFIG = [
       { label: "Cabeza de serie", category: "seed", codes: ["MEX", "CAN", "BRA", "USA", "GER", "NED", "BEL", "ESP", "FRA", "ARG", "POR", "ENG"] },
       { label: "Equipo fuerte 1", category: "strong", codes: ["ZAF", "KOR", "BIH", "QAT", "MAR", "HAI", "PAR", "AUS", "CUW", "CIV", "JPN", "SWE", "EGY", "IRN", "CPV", "KSA", "SEN", "IRQ", "ALG", "AUT", "COD", "UZB", "CRO", "GHA"] },
@@ -1663,22 +1743,95 @@
       setTimeout(() => makeBurst(110), 800);
     }
 
-    async function loadQuinielaDashboard() {
+    async function loadQuinielaDashboard(refreshMode = "") {
       const dashboard = document.getElementById("quinielaDashboard");
       if (!dashboard) return;
-      dashboard.innerHTML = `<div class="quiniela-status">Cargando quinielas confirmadas...</div>`;
+      dashboard.innerHTML = `<div class="quiniela-status">Cargando puntos...</div>`;
       try {
-        const endpoint = new URL("/api/quiniela", window.location.origin);
-        endpoint.searchParams.set("action", "getQuinielaDashboard");
-        endpoint.searchParams.set("t", Date.now().toString());
-        const response = await fetch(endpoint.toString(), { cache: "no-store" });
-        const payload = await response.json();
-        quinielaDashboardEntries = Array.isArray(payload.entries) ? payload.entries : [];
+        quinielaPointsByTeam = await loadQuinielaPoints(refreshMode);
+        quinielaPointsWarning = "";
+        logQuinielaPointDiagnostics("render", quinielaPointsByTeam);
 
         renderQuinielaDashboard();
       } catch (error) {
-        dashboard.innerHTML = `<div class="quiniela-status quiniela-error">No se pudo cargar el dashboard de quinielas.</div>`;
+        quinielaPointsByTeam = {};
+        quinielaPointsWarning = "No se pudieron cargar los puntos actualizados.";
+        renderQuinielaDashboard();
       }
+    }
+
+    async function loadQuinielaPoints(refreshMode = "") {
+      const forceBackendRefresh = refreshMode === true || refreshMode === "force";
+      const bypassFrontendCache = forceBackendRefresh || refreshMode === "endpoint";
+
+      if (!bypassFrontendCache) {
+        const cached = getCachedQuinielaPoints();
+        if (cached) {
+          console.log("[quinielaPoints] frontend cache", cached);
+          logQuinielaPointDiagnostics("frontend-cache", cached);
+          return cached;
+        }
+      } else {
+        localStorage.removeItem(QUINIELA_POINTS_CACHE_KEY);
+      }
+
+      const payload = await fetchQuinielaAction("quinielaPoints", forceBackendRefresh ? { refresh: "1" } : {});
+      console.log("[quinielaPoints] endpoint response", payload);
+      if (!payload || !payload.ok) throw new Error("No se pudieron cargar los puntos");
+      const pointsByTeam = payload.pointsByTeam || {};
+      console.log("[quinielaPoints] pointsByTeam", pointsByTeam);
+      logQuinielaPointDiagnostics(payload.cacheSource || "endpoint", pointsByTeam);
+      cacheQuinielaPoints(pointsByTeam);
+      return pointsByTeam;
+    }
+
+    function getCachedQuinielaPoints() {
+      try {
+        const cached = JSON.parse(localStorage.getItem(QUINIELA_POINTS_CACHE_KEY) || "null");
+        if (!cached || !cached.pointsByTeam || !cached.timestamp) return null;
+        if (Date.now() - cached.timestamp > QUINIELA_POINTS_CACHE_MS) return null;
+        return cached.pointsByTeam;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function cacheQuinielaPoints(pointsByTeam) {
+      try {
+        localStorage.setItem(QUINIELA_POINTS_CACHE_KEY, JSON.stringify({
+          timestamp: Date.now(),
+          pointsByTeam
+        }));
+      } catch (error) {
+        return;
+      }
+    }
+
+    async function refreshQuinielaPoints() {
+      const button = document.getElementById("refreshQuinielaPointsButton");
+      if (button) {
+        button.disabled = true;
+        button.textContent = "Actualizando...";
+      }
+      await loadQuinielaDashboard("endpoint");
+    }
+
+    function logQuinielaPointDiagnostics(source, pointsByTeam) {
+      console.log(`[quinielaPoints] source=${source}`, {
+        MEX: getTeamPoints("MEX", pointsByTeam),
+        BRA: getTeamPoints("BRA", pointsByTeam),
+        pointsByTeam
+      });
+    }
+
+    async function fetchQuinielaAction(action, params = {}) {
+      const endpoint = new URL("/api/quiniela", window.location.origin);
+      endpoint.searchParams.set("action", action);
+      Object.entries(params).forEach(([key, value]) => endpoint.searchParams.set(key, value));
+      endpoint.searchParams.set("t", Date.now().toString());
+      const response = await fetch(endpoint.toString(), { cache: "no-store" });
+      if (!response.ok) throw new Error(`No se pudo cargar ${action}`);
+      return response.json();
     }
 
     function initQuinielaDashboardFilters() {
@@ -1689,17 +1842,81 @@
       const dashboard = document.getElementById("quinielaDashboard");
       if (!dashboard) return;
 
-      if (!quinielaDashboardEntries.length) {
-        dashboard.innerHTML = `<div class="quiniela-status">No hay quinielas confirmadas todavía.</div>`;
-        return;
-      }
-
       dashboard.innerHTML = `
-        <div class="quiniela-status">
-          Ya ${quinielaDashboardEntries.length === 1 ? "hay 1 quiniela confirmada" : `hay ${quinielaDashboardEntries.length} quinielas confirmadas`}.
-          Las selecciones se mostrarán cuando todas las quinielas hayan sido completadas.
+        ${quinielaPointsWarning ? `<div class="note">${escapeHtml(quinielaPointsWarning)}</div>` : ""}
+        <div class="quiniela-standings-toolbar">
+          <button id="refreshQuinielaPointsButton" class="secondary-button" type="button" onclick="refreshQuinielaPoints()">Actualizar puntos</button>
+        </div>
+        ${renderQuinielaStandings()}
+      `;
+    }
+
+    function renderQuinielaStandings() {
+      const entries = typeof QUINIELA_ORDENADA !== "undefined" && Array.isArray(QUINIELA_ORDENADA)
+        ? QUINIELA_ORDENADA
+        : [];
+
+      return `
+        <div class="quiniela-standings-wrap">
+          <table class="quiniela-standings">
+            <thead>
+              <tr>
+                <th>Prioridad</th>
+                <th>Participante</th>
+                ${QUINIELA_STANDINGS_COLUMNS.map((column) => `<th>${escapeHtml(column)}</th>`).join("")}
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${entries.map((entry, index) => renderQuinielaStandingsRow(entry, index)).join("")}
+            </tbody>
+          </table>
         </div>
       `;
+    }
+
+    function renderQuinielaStandingsRow(entry) {
+      const picks = Array.isArray(entry.picks) ? entry.picks.slice(0, QUINIELA_STANDINGS_COLUMNS.length) : [];
+      const total = calculateStaticQuinielaTotal(entry, quinielaPointsByTeam);
+      return `
+        <tr>
+          <td class="quiniela-standings-priority">${escapeHtml(entry.prioridad || "")}</td>
+          <td>${escapeHtml(entry.participante || "Participante")}</td>
+          ${Array.from({ length: QUINIELA_STANDINGS_COLUMNS.length }, (_, pickIndex) => renderQuinielaPointsCell(picks[pickIndex])).join("")}
+          <td class="quiniela-standings-total">${total}</td>
+        </tr>
+      `;
+    }
+
+    function renderQuinielaPointsCell(pick) {
+      if (!pick) return `<td class="quiniela-standings-team"></td>`;
+      const code = pick?.code || "";
+      const flag = getPickFlag(pick);
+      const points = getTeamPoints(code, quinielaPointsByTeam);
+      return `
+        <td class="quiniela-standings-team">
+          <div class="quiniela-team-label">${escapeHtml(flag)} (${points})</div>
+        </td>
+      `;
+    }
+
+    function getPickFlag(pick) {
+      const label = String(pick?.label || "").trim();
+      return label.split(/\s+/)[0] || pick?.code || "";
+    }
+
+    function getTeamPoints(teamCode, pointsByTeam) {
+      const points = Number(pointsByTeam?.[teamCode]);
+      const normalizedPoints = Number.isFinite(points) ? points : 0;
+      if (teamCode) console.log("[quinielaPoints] getTeamPoints", teamCode, normalizedPoints);
+      return normalizedPoints;
+    }
+
+    function calculateStaticQuinielaTotal(entry, pointsByTeam) {
+      const picks = Array.isArray(entry?.picks) ? entry.picks : [];
+      return picks
+        .filter(Boolean)
+        .reduce((total, pick) => total + getTeamPoints(pick.code, pointsByTeam), 0);
     }
 
     function renderQuinielaDashboardEntry(entry) {

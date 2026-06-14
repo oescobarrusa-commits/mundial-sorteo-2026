@@ -31,12 +31,11 @@ async function handleGet(request, response, appsScriptUrl) {
   const url = new URL(request.url, `https://${request.headers.host || "localhost"}`);
   const action = url.searchParams.get("action") || "getQuinielaDashboard";
   const endpoint = new URL(appsScriptUrl);
+  url.searchParams.forEach((value, key) => {
+    if (key !== "t") endpoint.searchParams.set(key, value);
+  });
   endpoint.searchParams.set("action", action);
   endpoint.searchParams.set("t", Date.now().toString());
-
-  if (url.searchParams.has("code")) {
-    endpoint.searchParams.set("code", url.searchParams.get("code"));
-  }
 
   const upstreamResponse = await fetch(endpoint.toString(), { cache: "no-store" });
   if (!upstreamResponse.ok) {

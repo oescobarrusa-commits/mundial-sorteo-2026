@@ -110,6 +110,38 @@ drawVideoUrl: "https://www.youtube.com/watch?v=ID_DEL_VIDEO"
 
 El bracket se muestra por rondas cerradas por default. Los usuarios pueden abrir Dieciseisavos, Octavos, Cuartos, Semifinales o Finales desde el menu de cada ronda.
 
+## Administrar puntos de La Quiniela de los 8
+
+Los puntos de la quiniela se administran desde una pestana del Google Sheet llamada `PuntosEquipos`.
+No se necesita redeploy en Vercel para actualizar resultados: solo edita Google Sheets y refresca la app.
+
+La hoja debe tener estas columnas:
+
+```csv
+teamCode,teamName,cuartos,semifinal,final,campeon,totalPoints
+ARG,Argentina,1,2,3,10,16
+FRA,Francia,1,2,3,0,6
+MAR,Marruecos,1,0,0,0,1
+SWE,Suecia,0,0,0,0,0
+```
+
+La columna `totalPoints` se calcula directamente en Google Sheets. En la fila 2 puedes usar:
+
+```text
+=SUM(C2:F2)
+```
+
+Detalles:
+
+- La app solo lee `totalPoints`; no suma `cuartos`, `semifinal`, `final` ni `campeon`.
+- Si una fila no tiene `totalPoints`, la app usa `0`.
+- Si un equipo no existe en `PuntosEquipos`, la app usa `0`.
+- La tabla de transparencia de la quiniela usa el orden fijo definido en `quinielaOrdenada.js`.
+- La app no reordena participantes por puntos ni llena espacios vacios.
+- La columna `Total` suma los puntos de los paises existentes en cada renglon.
+- El endpoint `quinielaPoints` usa cache de Apps Script por 5 minutos.
+- El navegador tambien guarda los puntos por 5 minutos; el boton `Actualizar puntos` limpia ese cache y vuelve a consultar Google Sheets.
+
 ## Publicar cambios
 
 Despues de editar, guarda los archivos y ejecuta:

@@ -3,11 +3,13 @@ const SHEET_NAME = "participantes";
 const BRACKET_SHEET_NAME = "bracket";
 const QUINIELA_CODES_SHEET_NAME = "ParticipacionesQuiniela";
 const QUINIELA_RESPONSES_SHEET_NAME = "QuinielaRespuestas";
+const QUINIELA_POINTS_SHEET_NAME = "PuntosEquipos";
 
 function doGet(e) {
   const action = String(e?.parameter?.action || "").trim();
   if (action === "validateQuinielaCode") return jsonResponse(validateQuinielaCode(e.parameter.code));
   if (action === "getQuinielaDashboard") return jsonResponse(getQuinielaDashboard());
+  if (action === "quinielaPoints") return jsonResponse(getQuinielaPoints(e?.parameter?.refresh === "1"));
 
   const sheet = getSheet();
   const values = sheet.getDataRange().getDisplayValues();
@@ -215,6 +217,71 @@ function getQuinielaDashboard() {
     .filter((entry) => entry.participantName && String(entry.status).trim().toUpperCase() === "CONFIRMED");
 
   return { ok: true, entries };
+}
+
+function getQuinielaPoints(forceRefresh) {
+  const cache = CacheService.getScriptCache();
+  const cacheKey = "quinielaPoints";
+  if (forceRefresh) cache.remove(cacheKey);
+
+  if (!forceRefresh) {
+    const cached = cache.get(cacheKey);
+    if (cached) {
+      const cachedResponse = JSON.parse(cached);
+      cachedResponse.cacheSource = "appsScriptCache";
+      Logger.log("quinielaPoints source=appsScriptCache MEX=%s BRA=%s", cachedResponse.pointsByTeam?.MEX, cachedResponse.pointsByTeam?.BRA);
+      return cachedResponse;
+    }
+  }
+
+  const sheet = getSheetIfExists(QUINIELA_POINTS_SHEET_NAME);
+  if (!sheet) {
+    Logger.log("quinielaPoints source=googleSheets missingSheet");
+    return { ok: true, points: [], pointsByTeam: {}, cacheSource: "googleSheets" };
+  }
+
+  const values = sheet.getDataRange().getDisplayValues();
+  if (values.length < 2) {
+    Logger.log("quinielaPoints source=googleSheets emptySheet");
+    return { ok: true, points: [], pointsByTeam: {}, cacheSource: "googleSheets" };
+  }
+
+  const headers = values[0].map((header) => normalizeHeader(header));
+  const points = values.slice(1)
+    .filter((row) => row.some((cell) => String(cell).trim()))
+    .map((row) => {
+      const teamCode = normalizeCode(getValueByHeader(row, headers, ["teamcode", "code"]));
+      const cuartos = parsePointsValue(getValueByHeader(row, headers, ["cuartos"]));
+      const semifinal = parsePointsValue(getValueByHeader(row, headers, ["semifinal"]));
+      const final = parsePointsValue(getValueByHeader(row, headers, ["final"]));
+      const campeon = parsePointsValue(getValueByHeader(row, headers, ["campeon"]));
+      const totalPoints = parsePointsValue(getValueByHeader(row, headers, ["totalpoints"]));
+      return {
+        teamCode,
+        teamName: getValueByHeader(row, headers, ["teamname", "name"]) || getOfficialTeamMap()[teamCode] || "",
+        cuartos,
+        semifinal,
+        final,
+        campeon,
+        totalPoints
+      };
+    })
+    .filter((entry) => entry.teamCode);
+
+  const pointsByTeam = points.reduce((accumulator, entry) => {
+    accumulator[entry.teamCode] = entry.totalPoints;
+    return accumulator;
+  }, {});
+
+  const response = { ok: true, points, pointsByTeam, cacheSource: "googleSheets" };
+  Logger.log("quinielaPoints source=googleSheets forceRefresh=%s MEX=%s BRA=%s", forceRefresh, pointsByTeam.MEX, pointsByTeam.BRA);
+  cache.put(cacheKey, JSON.stringify(response), 300);
+  return response;
+}
+
+function parsePointsValue(value) {
+  const points = Number(value);
+  return Number.isFinite(points) ? points : 0;
 }
 
 function getQuinielaParticipationByCode(code) {
