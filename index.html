@@ -1150,7 +1150,6 @@
           <div id="quinielaDashboardSection">
             <div class="countries-header" style="margin-top: 22px;">
               <h2>Quinielas confirmadas</h2>
-              <p>Las participaciones se mantienen privadas hasta que todas hayan sido completadas.</p>
             </div>
             <div id="quinielaDashboard" class="quiniela-dashboard-grid"></div>
           </div>
@@ -1197,8 +1196,6 @@
     let quinielaCurrentPicks = [];
     let quinielaPointsByTeam = {};
     let quinielaPointsWarning = "";
-    const QUINIELA_POINTS_CACHE_KEY = "quinielaPoints:v1";
-    const QUINIELA_POINTS_CACHE_MS = 5 * 60 * 1000;
     const QUINIELA_STANDINGS_COLUMNS = [
       "Cabeza de Serie",
       "Selección 1",
@@ -1743,12 +1740,12 @@
       setTimeout(() => makeBurst(110), 800);
     }
 
-    async function loadQuinielaDashboard(refreshMode = "") {
+    async function loadQuinielaDashboard() {
       const dashboard = document.getElementById("quinielaDashboard");
       if (!dashboard) return;
       dashboard.innerHTML = `<div class="quiniela-status">Cargando puntos...</div>`;
       try {
-        quinielaPointsByTeam = await loadQuinielaPoints(refreshMode);
+        quinielaPointsByTeam = await loadQuinielaPoints();
         quinielaPointsWarning = "";
         logQuinielaPointDiagnostics("render", quinielaPointsByTeam);
 
@@ -1760,66 +1757,25 @@
       }
     }
 
-    async function loadQuinielaPoints(refreshMode = "") {
-      const forceBackendRefresh = refreshMode === true || refreshMode === "force";
-      const bypassFrontendCache = forceBackendRefresh || refreshMode === "endpoint";
-
-      if (!bypassFrontendCache) {
-        const cached = getCachedQuinielaPoints();
-        if (cached) {
-          console.log("[quinielaPoints] frontend cache", cached);
-          logQuinielaPointDiagnostics("frontend-cache", cached);
-          return cached;
-        }
-      } else {
-        localStorage.removeItem(QUINIELA_POINTS_CACHE_KEY);
-      }
-
-      const payload = await fetchQuinielaAction("quinielaPoints", forceBackendRefresh ? { refresh: "1" } : {});
+    async function loadQuinielaPoints() {
+      const payload = await fetchQuinielaAction("quinielaPoints");
       console.log("[quinielaPoints] endpoint response", payload);
       if (!payload || !payload.ok) throw new Error("No se pudieron cargar los puntos");
       const pointsByTeam = payload.pointsByTeam || {};
       console.log("[quinielaPoints] pointsByTeam", pointsByTeam);
+      console.log("[quinielaPoints] ARG from API detail", (payload.points || []).find((entry) => entry.teamCode === "ARG"));
+      console.log("[quinielaPoints] pointsByTeam.ARG", pointsByTeam.ARG);
+      console.log("[quinielaPoints] has ARG", Object.prototype.hasOwnProperty.call(pointsByTeam, "ARG"));
       logQuinielaPointDiagnostics(payload.cacheSource || "endpoint", pointsByTeam);
-      cacheQuinielaPoints(pointsByTeam);
       return pointsByTeam;
-    }
-
-    function getCachedQuinielaPoints() {
-      try {
-        const cached = JSON.parse(localStorage.getItem(QUINIELA_POINTS_CACHE_KEY) || "null");
-        if (!cached || !cached.pointsByTeam || !cached.timestamp) return null;
-        if (Date.now() - cached.timestamp > QUINIELA_POINTS_CACHE_MS) return null;
-        return cached.pointsByTeam;
-      } catch (error) {
-        return null;
-      }
-    }
-
-    function cacheQuinielaPoints(pointsByTeam) {
-      try {
-        localStorage.setItem(QUINIELA_POINTS_CACHE_KEY, JSON.stringify({
-          timestamp: Date.now(),
-          pointsByTeam
-        }));
-      } catch (error) {
-        return;
-      }
-    }
-
-    async function refreshQuinielaPoints() {
-      const button = document.getElementById("refreshQuinielaPointsButton");
-      if (button) {
-        button.disabled = true;
-        button.textContent = "Actualizando...";
-      }
-      await loadQuinielaDashboard("endpoint");
     }
 
     function logQuinielaPointDiagnostics(source, pointsByTeam) {
       console.log(`[quinielaPoints] source=${source}`, {
+        ARG: getTeamPoints("ARG", pointsByTeam),
         MEX: getTeamPoints("MEX", pointsByTeam),
         BRA: getTeamPoints("BRA", pointsByTeam),
+        hasARG: Object.prototype.hasOwnProperty.call(pointsByTeam, "ARG"),
         pointsByTeam
       });
     }
@@ -1844,9 +1800,6 @@
 
       dashboard.innerHTML = `
         ${quinielaPointsWarning ? `<div class="note">${escapeHtml(quinielaPointsWarning)}</div>` : ""}
-        <div class="quiniela-standings-toolbar">
-          <button id="refreshQuinielaPointsButton" class="secondary-button" type="button" onclick="refreshQuinielaPoints()">Actualizar puntos</button>
-        </div>
         ${renderQuinielaStandings()}
       `;
     }
@@ -1893,6 +1846,7 @@
       const code = pick?.code || "";
       const flag = getPickFlag(pick);
       const points = getTeamPoints(code, quinielaPointsByTeam);
+      console.log("[quinielaPoints] render cell", { teamCode: code, points, pick });
       return `
         <td class="quiniela-standings-team">
           <div class="quiniela-team-label">${escapeHtml(flag)} (${points})</div>

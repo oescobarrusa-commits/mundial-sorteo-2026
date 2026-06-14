@@ -9,7 +9,7 @@ function doGet(e) {
   const action = String(e?.parameter?.action || "").trim();
   if (action === "validateQuinielaCode") return jsonResponse(validateQuinielaCode(e.parameter.code));
   if (action === "getQuinielaDashboard") return jsonResponse(getQuinielaDashboard());
-  if (action === "quinielaPoints") return jsonResponse(getQuinielaPoints(e?.parameter?.refresh === "1"));
+  if (action === "quinielaPoints") return jsonResponse(getQuinielaPoints());
 
   const sheet = getSheet();
   const values = sheet.getDataRange().getDisplayValues();
@@ -219,21 +219,7 @@ function getQuinielaDashboard() {
   return { ok: true, entries };
 }
 
-function getQuinielaPoints(forceRefresh) {
-  const cache = CacheService.getScriptCache();
-  const cacheKey = "quinielaPoints";
-  if (forceRefresh) cache.remove(cacheKey);
-
-  if (!forceRefresh) {
-    const cached = cache.get(cacheKey);
-    if (cached) {
-      const cachedResponse = JSON.parse(cached);
-      cachedResponse.cacheSource = "appsScriptCache";
-      Logger.log("quinielaPoints source=appsScriptCache MEX=%s BRA=%s", cachedResponse.pointsByTeam?.MEX, cachedResponse.pointsByTeam?.BRA);
-      return cachedResponse;
-    }
-  }
-
+function getQuinielaPoints() {
   const sheet = getSheetIfExists(QUINIELA_POINTS_SHEET_NAME);
   if (!sheet) {
     Logger.log("quinielaPoints source=googleSheets missingSheet");
@@ -247,18 +233,23 @@ function getQuinielaPoints(forceRefresh) {
   }
 
   const headers = values[0].map((header) => normalizeHeader(header));
+  Logger.log(
+    "quinielaPoints columns teamCode=A index=0 totalPoints=G index=6 headers=%s",
+    JSON.stringify(headers)
+  );
+
   const points = values.slice(1)
     .filter((row) => row.some((cell) => String(cell).trim()))
     .map((row) => {
-      const teamCode = normalizeCode(getValueByHeader(row, headers, ["teamcode", "code"]));
-      const cuartos = parsePointsValue(getValueByHeader(row, headers, ["cuartos"]));
-      const semifinal = parsePointsValue(getValueByHeader(row, headers, ["semifinal"]));
-      const final = parsePointsValue(getValueByHeader(row, headers, ["final"]));
-      const campeon = parsePointsValue(getValueByHeader(row, headers, ["campeon"]));
-      const totalPoints = parsePointsValue(getValueByHeader(row, headers, ["totalpoints"]));
+      const teamCode = normalizeCode(row[0]);
+      const cuartos = parsePointsValue(row[2]);
+      const semifinal = parsePointsValue(row[3]);
+      const final = parsePointsValue(row[4]);
+      const campeon = parsePointsValue(row[5]);
+      const totalPoints = parsePointsValue(row[6]);
       return {
         teamCode,
-        teamName: getValueByHeader(row, headers, ["teamname", "name"]) || getOfficialTeamMap()[teamCode] || "",
+        teamName: String(row[1] || "").trim() || getOfficialTeamMap()[teamCode] || "",
         cuartos,
         semifinal,
         final,
@@ -274,8 +265,14 @@ function getQuinielaPoints(forceRefresh) {
   }, {});
 
   const response = { ok: true, points, pointsByTeam, cacheSource: "googleSheets" };
-  Logger.log("quinielaPoints source=googleSheets forceRefresh=%s MEX=%s BRA=%s", forceRefresh, pointsByTeam.MEX, pointsByTeam.BRA);
-  cache.put(cacheKey, JSON.stringify(response), 300);
+  Logger.log(
+    "quinielaPoints source=googleSheets ARG=%s MEX=%s BRA=%s hasARG=%s keys=%s",
+    pointsByTeam.ARG,
+    pointsByTeam.MEX,
+    pointsByTeam.BRA,
+    Object.prototype.hasOwnProperty.call(pointsByTeam, "ARG"),
+    Object.keys(pointsByTeam).join(",")
+  );
   return response;
 }
 

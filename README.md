@@ -139,8 +139,7 @@ Detalles:
 - La tabla de transparencia de la quiniela usa el orden fijo definido en `quinielaOrdenada.js`.
 - La app no reordena participantes por puntos ni llena espacios vacios.
 - La columna `Total` suma los puntos de los paises existentes en cada renglon.
-- El endpoint `quinielaPoints` usa cache de Apps Script por 5 minutos.
-- El navegador tambien guarda los puntos por 5 minutos; el boton `Actualizar puntos` limpia ese cache y vuelve a consultar Google Sheets.
+- El endpoint `quinielaPoints` lee Google Sheets directamente y no guarda puntos en cache del navegador.
 
 ## Publicar cambios
 
