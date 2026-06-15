@@ -218,5 +218,25 @@ const QUINIELA_ORDENADA = [
       null,
       { code: "QAT", label: "🇶🇦 Catar" }
     ]
+  },
+  {
+    prioridad: 12,
+    participante: "Juan Carlos Escobar Rico",
+    picks: [
+      { code: "POR", label: "🇵🇹 Portugal" },
+      { code: "MAR", label: "🇲🇦 Marruecos" },
+      { code: "COL", label: "🇨🇴 Colombia" },
+      null,
+      { code: "KOR", label: "🇰🇷 Corea del Sur" },
+      { code: "JPN", label: "🇯🇵 Japón" },
+      { code: "URU", label: "🇺🇾 Uruguay" },
+      null,
+      null,
+      null,
+      null,
+      null,
+      { code: "GHA", label: "🇬🇭 Ghana" },
+      { code: "CZE", label: "🇨🇿 Republica Checa" }
+    ]
   }
 ];
