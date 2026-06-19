@@ -1285,6 +1285,16 @@
       return new Date(2026, 5, day);
     }
 
+    function parseMatchTime(timeLabel) {
+      const match = String(timeLabel || "").match(/(\d{1,2}):(\d{2})/);
+      if (!match) return Number.POSITIVE_INFINITY;
+      return (Number(match[1]) * 60) + Number(match[2]);
+    }
+
+    function compareMatchesByTime(a, b) {
+      return parseMatchTime(a.time) - parseMatchTime(b.time) || a.number - b.number;
+    }
+
     function getMexicoTodayLabel() {
       const parts = new Intl.DateTimeFormat("es-MX", {
         day: "numeric",
@@ -1343,7 +1353,7 @@
       const selectedDate = select.value;
       const dayMatches = data.matches
         .filter((match) => match.date === selectedDate)
-        .sort((a, b) => a.number - b.number);
+        .sort(compareMatchesByTime);
 
       document.getElementById("todayHeadline").textContent =
         selectedDate ? `¿Quién juega el ${selectedDate}?` : "¿Quién juega hoy?";
