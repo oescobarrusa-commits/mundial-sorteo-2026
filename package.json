@@ -1,0 +1,23 @@
+{
+  "name": "primary",
+  "version": "1.0.0",
+  "description": "Portal web estatico para consultar participantes, paises asignados, partidos de fase de grupos y bracket del sorteo del Mundial 2026.",
+  "main": "data.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oescobarrusa-commits/mundial-sorteo-2026.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/oescobarrusa-commits/mundial-sorteo-2026/issues"
+  },
+  "homepage": "https://github.com/oescobarrusa-commits/mundial-sorteo-2026#readme",
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
+  }
+}
