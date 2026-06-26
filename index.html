@@ -501,7 +501,7 @@
 
     .bracket-round-title {
       display: grid;
-      grid-template-columns: 1fr auto auto;
+      grid-template-columns: 1fr;
       gap: 14px;
       align-items: center;
       padding: 18px;
@@ -510,38 +510,11 @@
       font-weight: 900;
       letter-spacing: 0.9px;
       text-transform: uppercase;
-      cursor: pointer;
       list-style: none;
     }
 
     .bracket-round-title::-webkit-details-marker {
       display: none;
-    }
-
-    .bracket-round-title::after {
-      content: "+";
-      display: grid;
-      place-items: center;
-      width: 32px;
-      height: 32px;
-      border: 1px solid rgba(0, 120, 255, 0.28);
-      border-radius: 50%;
-      color: #fff;
-      background: var(--gold);
-      font-size: 20px;
-      line-height: 1;
-    }
-
-    .bracket-round[open] .bracket-round-title::after {
-      content: "-";
-    }
-
-    .bracket-round-hint {
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 0;
-      text-transform: none;
     }
 
     .bracket-round-content {
@@ -1099,11 +1072,7 @@
       }
 
       .bracket-round-title {
-        grid-template-columns: 1fr auto;
-      }
-
-      .bracket-round-hint {
-        grid-column: 1 / -1;
+        grid-template-columns: 1fr;
       }
 
       .site-footer {
@@ -2157,30 +2126,58 @@
       const championCode = data.bracket?.champion || "";
       const champion = championCode ? getTeam(championCode) : null;
       const championOwner = championCode ? getOwnerByTeam(championCode) : "";
+      const visibleRounds = getVisibleBracketRounds(rounds, champion ? championCode : "");
+
+      if (champion) {
+        container.innerHTML = `
+          <div class="bracket-board">
+            <div class="champion-panel">
+              <div class="champion-trophy">🏆</div>
+              <h3>${champion.flag} ${champion.displayName}</h3>
+              <p>Campeón</p>
+              <p><strong>Ganador del sorteo:</strong><br>${championOwner}</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
 
       container.innerHTML = `
         <div class="bracket-board">
-          ${rounds.map((round) => `
-            <details class="bracket-round">
-              <summary class="bracket-round-title">
+          ${visibleRounds.map((round) => `
+            <section class="bracket-round">
+              <div class="bracket-round-title">
                 <span>${getRoundDisplayName(round.name)}</span>
-                <span class="bracket-round-hint">Click para desplegar</span>
-              </summary>
+              </div>
               <div class="bracket-round-content">
                 ${round.matches.map((match, index) => renderBracketMatch(match, index + 1)).join("")}
-                ${round.name === "Final" && champion ? `
-                  <div class="champion-panel">
-                    <div class="champion-trophy">🏆</div>
-                    <h3>${champion.flag} ${champion.displayName}</h3>
-                    <p>Campeón</p>
-                    <p><strong>Ganador del sorteo:</strong><br>${championOwner}</p>
-                  </div>
-                ` : ""}
-                </div>
-            </details>
+              </div>
+            </section>
           `).join("")}
         </div>
       `;
+    }
+
+    function getVisibleBracketRounds(rounds, championCode) {
+      if (championCode) return [];
+      const flow = ["Dieciseisavos", "Octavos", "Cuartos", "Semifinal", "Final"];
+      const latestRoundIndex = rounds.reduce((latestIndex, round) => {
+        if (!hasBracketRoundInfo(round)) return latestIndex;
+        const roundIndex = flow.indexOf(round.name);
+        return roundIndex > latestIndex ? roundIndex : latestIndex;
+      }, -1);
+
+      if (latestRoundIndex === -1) return rounds;
+      if (flow[latestRoundIndex] === "Final") return rounds.filter((round) => round.name === "Final");
+
+      return rounds.filter((round) => {
+        const roundIndex = flow.indexOf(round.name);
+        return roundIndex === -1 || roundIndex >= latestRoundIndex;
+      });
+    }
+
+    function hasBracketRoundInfo(round) {
+      return Array.isArray(round.matches) && round.matches.some((match) => match.a || match.b || match.winner);
     }
 
     function getRoundDisplayName(name) {
