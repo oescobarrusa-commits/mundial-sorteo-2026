@@ -577,7 +577,7 @@
     .bracket-team {
       display: grid;
       grid-template-columns: 1fr auto;
-      gap: 10px;
+      gap: 14px;
       padding: 13px 12px;
       border-right: 1px solid var(--border);
     }
@@ -592,11 +592,19 @@
     }
 
     .bracket-country {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       margin-bottom: 5px;
       color: var(--text);
       font-size: 18px;
       font-weight: 900;
       line-height: 1.2;
+    }
+
+    .bracket-flag {
+      font-size: 54px;
+      line-height: 1;
     }
 
     .bracket-owner {
@@ -2205,7 +2213,7 @@
               <div class="bracket-country">Pendiente</div>
               <div class="bracket-owner">Por definir</div>
             </div>
-            <div class="bracket-score">${score ?? "-"}</div>
+            <div class="bracket-score">${score ?? ""}</div>
           </div>
         `;
       }
@@ -2213,10 +2221,10 @@
       return `
         <div class="bracket-team ${isWinner ? "winner" : ""}">
           <div>
-            <div class="bracket-country">${team.flag} ${team.displayName}</div>
+            <div class="bracket-country"><span class="bracket-flag">${team.flag}</span><span>${team.displayName}</span></div>
             <div class="bracket-owner">${getOwnerByTeam(team.code)}</div>
           </div>
-          <div class="bracket-score">${score ?? "-"}</div>
+          <div class="bracket-score">${score ?? ""}</div>
         </div>
       `;
     }
