@@ -589,12 +589,15 @@
     .bracket-country {
       margin-bottom: 5px;
       color: var(--text);
+      font-size: 18px;
       font-weight: 900;
+      line-height: 1.2;
     }
 
     .bracket-owner {
       color: var(--muted);
-      font-size: 13px;
+      font-size: 15px;
+      font-weight: 800;
       line-height: 1.35;
     }
 
@@ -2177,6 +2180,18 @@
     }
 
     function renderBracketTeam(team, score, isWinner) {
+      if (!team) {
+        return `
+          <div class="bracket-team">
+            <div>
+              <div class="bracket-country">Pendiente</div>
+              <div class="bracket-owner">Por definir</div>
+            </div>
+            <div class="bracket-score">${score ?? "-"}</div>
+          </div>
+        `;
+      }
+
       return `
         <div class="bracket-team ${isWinner ? "winner" : ""}">
           <div>
@@ -2280,7 +2295,7 @@
               scoreA: match.scoreA,
               scoreB: match.scoreB,
               winner: String(match.winner || "").trim().toUpperCase()
-            })).filter((match) => match.a && match.b)
+            })).filter((match) => match.a || match.b)
             : []
         })).filter((round) => round.name && round.matches.length),
         champion: String(bracket?.champion || "").trim().toUpperCase()

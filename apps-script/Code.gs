@@ -73,14 +73,14 @@ function getBracket() {
       const columnIndex = headers.findIndex((header) => config.headers.includes(header));
       if (columnIndex === -1) return null;
 
-      const teams = getColumnValues(values, headers, config.headers);
+      const teams = getColumnValues(values, headers, config.headers, true);
       const matches = [];
 
       for (let index = 0; index < teams.length; index += 2) {
-        if (teams[index] && teams[index + 1]) {
+        if (teams[index] || teams[index + 1]) {
           matches.push({
-            a: teams[index],
-            b: teams[index + 1],
+            a: teams[index] || "",
+            b: teams[index + 1] || "",
             winner: config.name === "Final" && [teams[index], teams[index + 1]].includes(champion)
               ? champion
               : ""
@@ -95,13 +95,13 @@ function getBracket() {
   return { rounds, champion };
 }
 
-function getColumnValues(values, headers, headerCandidates) {
+function getColumnValues(values, headers, headerCandidates, keepBlanks) {
   const columnIndex = headers.findIndex((header) => headerCandidates.includes(header));
   if (columnIndex === -1) return [];
-  return values
+  const columnValues = values
     .slice(1)
-    .map((row) => String(row[columnIndex] || "").trim().toUpperCase())
-    .filter(Boolean);
+    .map((row) => String(row[columnIndex] || "").trim().toUpperCase());
+  return keepBlanks ? columnValues : columnValues.filter(Boolean);
 }
 
 function getBracketRoundConfigs() {
