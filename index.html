@@ -2239,17 +2239,29 @@
     }
 
     function getSheetOrderedRoundOf32Matches(matches) {
-      return matches.flatMap((match) => {
+      const orderedMatches = [];
+      let mexicoSwitzerlandBlockInserted = false;
+
+      matches.forEach((match) => {
         const teams = [match.a, match.b].filter(Boolean);
-        const hasMexicoAndSwitzerland = teams.includes("MEX") && teams.includes("SUI");
-        if (!hasMexicoAndSwitzerland) return [match];
-        return [
-          { a: "MEX", b: "", winner: "" },
-          createEmptyBracketMatch(),
-          { a: "SUI", b: "", winner: "" },
-          createEmptyBracketMatch()
-        ];
+        const isMexicoOrSwitzerlandSlot = teams.includes("MEX") || teams.includes("SUI");
+        if (!isMexicoOrSwitzerlandSlot) {
+          orderedMatches.push(match);
+          return;
+        }
+
+        if (!mexicoSwitzerlandBlockInserted) {
+          orderedMatches.push(
+            { a: "MEX", b: "", winner: "" },
+            createEmptyBracketMatch(),
+            { a: "SUI", b: "", winner: "" },
+            createEmptyBracketMatch()
+          );
+          mexicoSwitzerlandBlockInserted = true;
+        }
       });
+
+      return orderedMatches;
     }
 
     function createEmptyBracketMatch() {
@@ -2340,8 +2352,8 @@
         return `
           <div class="bracket-team">
             <div>
-              <div class="bracket-country">Pendiente</div>
-              <div class="bracket-owner">Por definir</div>
+              <div class="bracket-country">TBD</div>
+              <div class="bracket-owner">TBD</div>
             </div>
             <div class="bracket-score">${score ?? ""}</div>
           </div>
