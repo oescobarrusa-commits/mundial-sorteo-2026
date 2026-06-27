@@ -73,26 +73,72 @@ function getBracket() {
       const columnIndex = headers.findIndex((header) => config.headers.includes(header));
       if (columnIndex === -1) return null;
 
-      const teams = getColumnValues(values, headers, config.headers, true);
-      const matches = [];
-
-      for (let index = 0; index < teams.length; index += 2) {
-        if (teams[index] || teams[index + 1]) {
-          matches.push({
-            a: teams[index] || "",
-            b: teams[index + 1] || "",
-            winner: config.name === "Final" && [teams[index], teams[index + 1]].includes(champion)
-              ? champion
-              : ""
-          });
-        }
-      }
+      const matches = getBracketMatches(values, headers, config, champion);
 
       return matches.length ? { name: config.name, matches } : null;
     })
     .filter(Boolean);
 
   return { rounds, champion };
+}
+
+function getBracketMatches(values, headers, config, champion) {
+  if (config.name === "Dieciseisavos" && hasBracketMatchNumberColumn(headers)) {
+    return getBracketMatchesByMatchNumber(values, headers, config, champion);
+  }
+
+  const teams = getColumnValues(values, headers, config.headers, true);
+  const matches = [];
+
+  for (let index = 0; index < teams.length; index += 2) {
+    if (teams[index] || teams[index + 1]) {
+      matches.push(createBracketMatch(teams[index] || "", teams[index + 1] || "", champion, config.name, matches.length + 1));
+    }
+  }
+
+  return matches;
+}
+
+function getBracketMatchesByMatchNumber(values, headers, config, champion) {
+  const matchNumberIndex = headers.findIndex((header) => ["partido", "match", "matchnumber", "game"].includes(header));
+  const teamIndex = headers.findIndex((header) => config.headers.includes(header));
+  const matchesByNumber = {};
+  let currentMatchNumber = "";
+
+  values.slice(1).forEach((row) => {
+    const rowMatchNumber = String(row[matchNumberIndex] || "").trim();
+    if (rowMatchNumber) currentMatchNumber = rowMatchNumber;
+    if (!currentMatchNumber) return;
+
+    if (!matchesByNumber[currentMatchNumber]) {
+      matchesByNumber[currentMatchNumber] = {
+        matchNumber: Number(currentMatchNumber) || currentMatchNumber,
+        teams: []
+      };
+    }
+
+    matchesByNumber[currentMatchNumber].teams.push(String(row[teamIndex] || "").trim().toUpperCase());
+  });
+
+  return Object.keys(matchesByNumber)
+    .sort((a, b) => Number(a) - Number(b))
+    .map((key) => {
+      const entry = matchesByNumber[key];
+      return createBracketMatch(entry.teams[0] || "", entry.teams[1] || "", champion, config.name, entry.matchNumber);
+    });
+}
+
+function createBracketMatch(teamA, teamB, champion, roundName, matchNumber) {
+  return {
+    matchNumber,
+    a: teamA,
+    b: teamB,
+    winner: roundName === "Final" && [teamA, teamB].includes(champion) ? champion : ""
+  };
+}
+
+function hasBracketMatchNumberColumn(headers) {
+  return headers.some((header) => ["partido", "match", "matchnumber", "game"].includes(header));
 }
 
 function getColumnValues(values, headers, headerCandidates, keepBlanks) {

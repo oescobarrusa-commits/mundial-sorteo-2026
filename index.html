@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sorteo Mundial 2026</title>
-  <script src="data.js?v=20260627-bracket-order"></script>
-  <script src="quinielaOrdenada.js?v=20260627-bracket-order"></script>
+  <script src="data.js?v=20260627-partido-column"></script>
+  <script src="quinielaOrdenada.js?v=20260627-partido-column"></script>
   <script defer src="/_vercel/insights/script.js"></script>
   <style>
     :root {
@@ -2233,12 +2233,17 @@
 
     function getBracketMatchesForRound(roundName, matches, matchCount) {
       const orderedMatches = roundName === "Dieciseisavos"
-        ? getSheetOrderedRoundOf32Matches(matches)
+        ? getSheetOrderedRoundOf32Matches(matches, matchCount)
         : matches;
       return Array.from({ length: matchCount }, (_, index) => orderedMatches[index] || createEmptyBracketMatch());
     }
 
-    function getSheetOrderedRoundOf32Matches(matches) {
+    function getSheetOrderedRoundOf32Matches(matches, matchCount) {
+      if (matches.some((match) => match.matchNumber)) {
+        const matchesByNumber = new Map(matches.map((match) => [Number(match.matchNumber), match]));
+        return Array.from({ length: matchCount }, (_, index) => matchesByNumber.get(index + 1) || createEmptyBracketMatch(index + 1));
+      }
+
       const teams = new Set(matches.flatMap((match) => [match.a, match.b]).filter(Boolean));
       return [
         createBracketMatchFromCodes("ZAF", "CAN", teams),
@@ -2248,13 +2253,13 @@
         createBracketMatchFromCodes("BEL", "", teams),
         createBracketMatchFromCodes("USA", "BIH", teams),
         createBracketMatchFromCodes("ESP", "", teams),
-        createEmptyBracketMatch(),
+        createEmptyBracketMatch(8),
         createBracketMatchFromCodes("BRA", "JPN", teams),
         createBracketMatchFromCodes("CIV", "NOR", teams),
         createBracketMatchFromCodes("MEX", "", teams),
-        createEmptyBracketMatch(),
+        createEmptyBracketMatch(12),
         createBracketMatchFromCodes("SUI", "", teams),
-        createEmptyBracketMatch(),
+        createEmptyBracketMatch(14),
         createBracketMatchFromCodes("AUS", "EGY", teams),
         createBracketMatchFromCodes("ARG", "CPV", teams)
       ];
@@ -2268,8 +2273,9 @@
       };
     }
 
-    function createEmptyBracketMatch() {
+    function createEmptyBracketMatch(matchNumber) {
       return {
+        matchNumber: matchNumber || "",
         a: "",
         b: "",
         winner: ""
@@ -2297,13 +2303,14 @@
       const teamB = getTeam(match.b);
       const schedule = getBracketMatchSchedule(roundName, match, index);
       const connectorClasses = getBracketConnectorClasses(roundName, index);
+      const matchLabel = match.matchNumber || index + 1;
       return `
         <article class="bracket-match ${connectorClasses}" style="grid-row: ${getBracketGridRow(roundName, index)}; --connector-rows: ${getBracketConnectorRows(roundName)};">
           <span class="bracket-link bracket-link-in"></span>
           <span class="bracket-link bracket-link-out"></span>
           <span class="bracket-link bracket-link-vertical"></span>
           <div class="bracket-match-header">
-            <span>Partido ${index + 1}</span>
+            <span>Partido ${matchLabel}</span>
             <span class="bracket-match-date">${schedule}</span>
           </div>
           <div class="bracket-teams">
@@ -2524,12 +2531,13 @@
           name: String(round.name || "").trim(),
           matches: Array.isArray(round.matches)
             ? round.matches.map((match) => ({
+              matchNumber: match.matchNumber || "",
               a: String(match.a || "").trim().toUpperCase(),
               b: String(match.b || "").trim().toUpperCase(),
               scoreA: match.scoreA,
               scoreB: match.scoreB,
               winner: String(match.winner || "").trim().toUpperCase()
-            })).filter((match) => match.a || match.b)
+            })).filter((match) => match.matchNumber || match.a || match.b)
             : []
         })).filter((round) => round.name && round.matches.length),
         champion: String(bracket?.champion || "").trim().toUpperCase()
