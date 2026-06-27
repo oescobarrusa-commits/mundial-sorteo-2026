@@ -488,9 +488,12 @@
     }
 
     .bracket-board {
+      --connector-gap: 18px;
+      --connector-color: #d1d5db;
+      --connector-width: 2px;
       display: grid;
       grid-template-columns: repeat(5, minmax(236px, 280px));
-      gap: 18px;
+      gap: var(--connector-gap);
       align-items: start;
       min-width: 1320px;
     }
@@ -527,13 +530,50 @@
 
     .bracket-match {
       align-self: center;
-      overflow: hidden;
+      position: relative;
+      overflow: visible;
       border: 1px solid var(--border);
       border-radius: 8px;
       background: #fff;
     }
 
+    .bracket-link {
+      position: absolute;
+      z-index: 0;
+      display: none;
+      pointer-events: none;
+    }
+
+    .bracket-match.has-input .bracket-link-in,
+    .bracket-match.has-output .bracket-link-out,
+    .bracket-match.connector-down .bracket-link-vertical {
+      display: block;
+    }
+
+    .bracket-link-in {
+      right: 100%;
+      top: 50%;
+      width: calc(var(--connector-gap) / 2);
+      border-top: var(--connector-width) solid var(--connector-color);
+    }
+
+    .bracket-link-out {
+      left: 100%;
+      top: 50%;
+      width: calc(var(--connector-gap) / 2);
+      border-top: var(--connector-width) solid var(--connector-color);
+    }
+
+    .bracket-link-vertical {
+      left: calc(100% + (var(--connector-gap) / 2));
+      top: 50%;
+      height: calc(var(--connector-rows, 1) * 138px);
+      border-right: var(--connector-width) solid var(--connector-color);
+    }
+
     .bracket-match-header {
+      position: relative;
+      z-index: 1;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
@@ -554,7 +594,11 @@
     }
 
     .bracket-teams {
+      position: relative;
+      z-index: 1;
       display: grid;
+      overflow: hidden;
+      border-radius: 0 0 8px 8px;
     }
 
     .bracket-team {
@@ -2236,8 +2280,12 @@
       const teamA = getTeam(match.a);
       const teamB = getTeam(match.b);
       const schedule = getBracketMatchSchedule(roundName, match, index);
+      const connectorClasses = getBracketConnectorClasses(roundName, index);
       return `
-        <article class="bracket-match" style="grid-row: ${getBracketGridRow(roundName, index)};">
+        <article class="bracket-match ${connectorClasses}" style="grid-row: ${getBracketGridRow(roundName, index)}; --connector-rows: ${getBracketConnectorRows(roundName)};">
+          <span class="bracket-link bracket-link-in"></span>
+          <span class="bracket-link bracket-link-out"></span>
+          <span class="bracket-link bracket-link-vertical"></span>
           <div class="bracket-match-header">
             <span>Partido ${index + 1}</span>
             <span class="bracket-match-date">${schedule}</span>
@@ -2248,6 +2296,23 @@
           </div>
         </article>
       `;
+    }
+
+    function getBracketConnectorClasses(roundName, index) {
+      const definition = getBracketRoundDefinitions().find((round) => round.name === roundName);
+      const roundIndex = getBracketRoundDefinitions().findIndex((round) => round.name === roundName);
+      const classes = [];
+      if (roundIndex > 0) classes.push("has-input");
+      if (definition && roundIndex < getBracketRoundDefinitions().length - 1) {
+        classes.push("has-output");
+        if (index % 2 === 0) classes.push("connector-down");
+      }
+      return classes.join(" ");
+    }
+
+    function getBracketConnectorRows(roundName) {
+      const definition = getBracketRoundDefinitions().find((round) => round.name === roundName);
+      return definition ? 16 / definition.matchCount : 1;
     }
 
     function getBracketGridRow(roundName, index) {
