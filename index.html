@@ -2239,29 +2239,33 @@
     }
 
     function getSheetOrderedRoundOf32Matches(matches) {
-      const orderedMatches = [];
-      let mexicoSwitzerlandBlockInserted = false;
+      const teams = new Set(matches.flatMap((match) => [match.a, match.b]).filter(Boolean));
+      return [
+        createBracketMatchFromCodes("ZAF", "CAN", teams),
+        createBracketMatchFromCodes("NED", "MAR", teams),
+        createBracketMatchFromCodes("GER", "PAR", teams),
+        createBracketMatchFromCodes("FRA", "SWE", teams),
+        createBracketMatchFromCodes("BEL", "", teams),
+        createBracketMatchFromCodes("USA", "BIH", teams),
+        createBracketMatchFromCodes("ESP", "", teams),
+        createEmptyBracketMatch(),
+        createBracketMatchFromCodes("BRA", "JPN", teams),
+        createBracketMatchFromCodes("CIV", "NOR", teams),
+        createBracketMatchFromCodes("MEX", "", teams),
+        createEmptyBracketMatch(),
+        createBracketMatchFromCodes("SUI", "", teams),
+        createEmptyBracketMatch(),
+        createBracketMatchFromCodes("AUS", "EGY", teams),
+        createBracketMatchFromCodes("ARG", "CPV", teams)
+      ];
+    }
 
-      matches.forEach((match) => {
-        const teams = [match.a, match.b].filter(Boolean);
-        const isMexicoOrSwitzerlandSlot = teams.includes("MEX") || teams.includes("SUI");
-        if (!isMexicoOrSwitzerlandSlot) {
-          orderedMatches.push(match);
-          return;
-        }
-
-        if (!mexicoSwitzerlandBlockInserted) {
-          orderedMatches.push(
-            { a: "MEX", b: "", winner: "" },
-            createEmptyBracketMatch(),
-            { a: "SUI", b: "", winner: "" },
-            createEmptyBracketMatch()
-          );
-          mexicoSwitzerlandBlockInserted = true;
-        }
-      });
-
-      return orderedMatches;
+    function createBracketMatchFromCodes(teamA, teamB, availableTeams) {
+      return {
+        a: teamA && availableTeams.has(teamA) ? teamA : "",
+        b: teamB && availableTeams.has(teamB) ? teamB : "",
+        winner: ""
+      };
     }
 
     function createEmptyBracketMatch() {
@@ -2337,14 +2341,7 @@
     }
 
     function getBracketCustomGridRows() {
-      return {
-        Cuartos: [
-          { start: 1, span: 4 },
-          { start: 5, span: 2 },
-          { start: 7, span: 4 },
-          { start: 11, span: 4 }
-        ]
-      };
+      return {};
     }
 
     function renderBracketTeam(team, score, isWinner) {
@@ -2403,6 +2400,8 @@
           "Mar, Jun 30, 5:00 PM ET",
           "Mié, Jul 1, 4:00 PM ET",
           "Mié, Jul 1, 8:00 PM ET",
+          "Jue, Jul 2, 3:00 PM ET",
+          "Jue, Jul 2, 7:00 PM ET",
           "Lun, Jun 29, 1:00 PM ET",
           "Mar, Jun 30, 1:00 PM ET",
           "Mar, Jun 30, 9:00 PM ET",
@@ -2410,19 +2409,17 @@
           "Jue, Jul 2, 11:00 PM ET",
           "Vie, Jul 3, 9:30 PM ET",
           "Vie, Jul 3, 2:00 PM ET",
-          "Vie, Jul 3, 6:00 PM ET",
-          "Jue, Jul 2, 7:00 PM ET",
-          "Jue, Jul 2, 3:00 PM ET"
+          "Vie, Jul 3, 6:00 PM ET"
         ],
         Octavos: [
           "Sáb, Jul 4, 5:00 PM ET",
           "Sáb, Jul 4, 1:00 PM ET",
           "Lun, Jul 6, 3:00 PM ET",
           "Lun, Jul 6, 8:00 PM ET",
+          "Dom, Jul 5, 4:00 PM ET",
           "Dom, Jul 5, 8:00 PM ET",
           "Mar, Jul 7, 4:00 PM ET",
-          "Mar, Jul 7, 12:00 PM ET",
-          "Dom, Jul 5, 4:00 PM ET"
+          "Mar, Jul 7, 12:00 PM ET"
         ],
         Cuartos: [
           "Jue, Jul 9, 4:00 PM ET",
