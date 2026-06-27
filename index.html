@@ -521,10 +521,12 @@
 
     .bracket-round-content {
       display: grid;
-      gap: 16px;
+      grid-template-rows: repeat(16, minmax(126px, auto));
+      gap: 12px;
     }
 
     .bracket-match {
+      align-self: center;
       overflow: hidden;
       border: 1px solid var(--border);
       border-radius: 8px;
@@ -2186,38 +2188,24 @@
     }
 
     function getBracketMatchesForRound(roundName, matches, matchCount) {
-      if (roundName === "Dieciseisavos") return getOfficialRoundOf32Matches(matches);
-      return Array.from({ length: matchCount }, (_, index) => matches[index] || createEmptyBracketMatch());
+      const orderedMatches = roundName === "Dieciseisavos"
+        ? getSheetOrderedRoundOf32Matches(matches)
+        : matches;
+      return Array.from({ length: matchCount }, (_, index) => orderedMatches[index] || createEmptyBracketMatch());
     }
 
-    function getOfficialRoundOf32Matches(matches) {
-      const availableTeams = new Set(matches.flatMap((match) => [match.a, match.b]).filter(Boolean));
-      return getOfficialRoundOf32Slots().map(([teamA, teamB]) => ({
-        a: availableTeams.has(teamA) ? teamA : "",
-        b: availableTeams.has(teamB) ? teamB : "",
-        winner: ""
-      }));
-    }
-
-    function getOfficialRoundOf32Slots() {
-      return [
-        ["ZAF", "CAN"],
-        ["NED", "MAR"],
-        ["GER", "PAR"],
-        ["FRA", "SWE"],
-        ["BEL", ""],
-        ["USA", "BIH"],
-        ["BRA", "JPN"],
-        ["CIV", "NOR"],
-        ["MEX", ""],
-        ["", ""],
-        ["ARG", "CPV"],
-        ["", ""],
-        ["ESP", ""],
-        ["SUI", ""],
-        ["AUS", "EGY"],
-        ["", ""]
-      ];
+    function getSheetOrderedRoundOf32Matches(matches) {
+      return matches.flatMap((match) => {
+        const teams = [match.a, match.b].filter(Boolean);
+        const hasMexicoAndSwitzerland = teams.includes("MEX") && teams.includes("SUI");
+        if (!hasMexicoAndSwitzerland) return [match];
+        return [
+          { a: "MEX", b: "", winner: "" },
+          createEmptyBracketMatch(),
+          { a: "SUI", b: "", winner: "" },
+          createEmptyBracketMatch()
+        ];
+      });
     }
 
     function createEmptyBracketMatch() {
@@ -2249,7 +2237,7 @@
       const teamB = getTeam(match.b);
       const schedule = getBracketMatchSchedule(roundName, match, index);
       return `
-        <article class="bracket-match">
+        <article class="bracket-match" style="grid-row: ${getBracketGridRow(roundName, index)};">
           <div class="bracket-match-header">
             <span>Partido ${index + 1}</span>
             <span class="bracket-match-date">${schedule}</span>
@@ -2260,6 +2248,12 @@
           </div>
         </article>
       `;
+    }
+
+    function getBracketGridRow(roundName, index) {
+      const definition = getBracketRoundDefinitions().find((round) => round.name === roundName);
+      const rowSpan = definition ? 16 / definition.matchCount : 1;
+      return `${index * rowSpan + 1} / span ${rowSpan}`;
     }
 
     function renderBracketTeam(team, score, isWinner) {
@@ -2322,22 +2316,22 @@
           "Mar, Jun 30, 1:00 PM ET",
           "Mar, Jun 30, 9:00 PM ET",
           "Mié, Jul 1, 12:00 PM ET",
+          "Jue, Jul 2, 11:00 PM ET",
+          "Vie, Jul 3, 9:30 PM ET",
+          "Vie, Jul 3, 2:00 PM ET",
           "Vie, Jul 3, 6:00 PM ET",
           "Jue, Jul 2, 7:00 PM ET",
-          "Jue, Jul 2, 3:00 PM ET",
-          "Jue, Jul 2, 11:00 PM ET",
-          "Vie, Jul 3, 2:00 PM ET",
-          "Vie, Jul 3, 9:30 PM ET"
+          "Jue, Jul 2, 3:00 PM ET"
         ],
         Octavos: [
           "Sáb, Jul 4, 5:00 PM ET",
           "Sáb, Jul 4, 1:00 PM ET",
           "Lun, Jul 6, 3:00 PM ET",
           "Lun, Jul 6, 8:00 PM ET",
-          "Dom, Jul 5, 4:00 PM ET",
           "Dom, Jul 5, 8:00 PM ET",
+          "Mar, Jul 7, 4:00 PM ET",
           "Mar, Jul 7, 12:00 PM ET",
-          "Mar, Jul 7, 4:00 PM ET"
+          "Dom, Jul 5, 4:00 PM ET"
         ],
         Cuartos: [
           "Jue, Jul 9, 4:00 PM ET",
