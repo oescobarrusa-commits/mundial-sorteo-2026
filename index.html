@@ -489,10 +489,10 @@
 
     .bracket-board {
       display: grid;
-      grid-template-columns: repeat(5, minmax(280px, 340px));
+      grid-template-columns: repeat(5, minmax(236px, 280px));
       gap: 18px;
       align-items: start;
-      min-width: 1560px;
+      min-width: 1320px;
     }
 
     .bracket-round {
@@ -558,8 +558,8 @@
     .bracket-team {
       display: grid;
       grid-template-columns: 1fr auto;
-      gap: 14px;
-      padding: 13px 12px;
+      gap: 10px;
+      padding: 11px 10px;
       border-bottom: 1px solid var(--border);
     }
 
@@ -574,25 +574,32 @@
 
     .bracket-country {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 10px;
       margin-bottom: 5px;
       color: var(--text);
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 900;
       line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+
+    .bracket-country span:last-child {
+      min-width: 0;
     }
 
     .bracket-flag {
-      font-size: 54px;
+      flex: 0 0 auto;
+      font-size: 40px;
       line-height: 1;
     }
 
     .bracket-owner {
       color: var(--muted);
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 800;
       line-height: 1.35;
+      overflow-wrap: anywhere;
     }
 
     .bracket-score {
@@ -2173,13 +2180,52 @@
         const matches = round?.matches || [];
         return {
           name: definition.name,
-          matches: Array.from({ length: definition.matchCount }, (_, index) => matches[index] || {
-            a: "",
-            b: "",
-            winner: ""
-          })
+          matches: getBracketMatchesForRound(definition.name, matches, definition.matchCount)
         };
       });
+    }
+
+    function getBracketMatchesForRound(roundName, matches, matchCount) {
+      if (roundName === "Dieciseisavos") return getOfficialRoundOf32Matches(matches);
+      return Array.from({ length: matchCount }, (_, index) => matches[index] || createEmptyBracketMatch());
+    }
+
+    function getOfficialRoundOf32Matches(matches) {
+      const availableTeams = new Set(matches.flatMap((match) => [match.a, match.b]).filter(Boolean));
+      return getOfficialRoundOf32Slots().map(([teamA, teamB]) => ({
+        a: availableTeams.has(teamA) ? teamA : "",
+        b: availableTeams.has(teamB) ? teamB : "",
+        winner: ""
+      }));
+    }
+
+    function getOfficialRoundOf32Slots() {
+      return [
+        ["ZAF", "CAN"],
+        ["NED", "MAR"],
+        ["GER", "PAR"],
+        ["FRA", "SWE"],
+        ["BEL", ""],
+        ["USA", "BIH"],
+        ["BRA", "JPN"],
+        ["CIV", "NOR"],
+        ["MEX", ""],
+        ["", ""],
+        ["ARG", "CPV"],
+        ["", ""],
+        ["ESP", ""],
+        ["SUI", ""],
+        ["AUS", "EGY"],
+        ["", ""]
+      ];
+    }
+
+    function createEmptyBracketMatch() {
+      return {
+        a: "",
+        b: "",
+        winner: ""
+      };
     }
 
     function getBracketRoundDefinitions() {
@@ -2275,12 +2321,12 @@
           "Lun, Jun 29, 1:00 PM ET",
           "Mar, Jun 30, 1:00 PM ET",
           "Mar, Jun 30, 9:00 PM ET",
-          "Vie, Jul 3, 2:00 PM ET",
+          "Mié, Jul 1, 12:00 PM ET",
           "Vie, Jul 3, 6:00 PM ET",
           "Jue, Jul 2, 7:00 PM ET",
           "Jue, Jul 2, 3:00 PM ET",
           "Jue, Jul 2, 11:00 PM ET",
-          "Mié, Jul 1, 12:00 PM ET",
+          "Vie, Jul 3, 2:00 PM ET",
           "Vie, Jul 3, 9:30 PM ET"
         ],
         Octavos: [
