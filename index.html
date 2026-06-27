@@ -489,24 +489,26 @@
 
     .bracket-board {
       display: grid;
-      gap: 14px;
+      grid-template-columns: repeat(5, minmax(280px, 340px));
+      gap: 18px;
+      align-items: start;
+      min-width: 1560px;
     }
 
     .bracket-round {
-      overflow: hidden;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: #fff;
+      display: grid;
+      gap: 14px;
     }
 
     .bracket-round-title {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 14px;
-      align-items: center;
-      padding: 18px;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      padding: 12px 6px 14px;
+      border-bottom: 4px solid var(--gold);
+      background: #fff;
       color: var(--gold);
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 900;
       letter-spacing: 0.9px;
       text-transform: uppercase;
@@ -520,7 +522,6 @@
     .bracket-round-content {
       display: grid;
       gap: 16px;
-      padding: 0 18px 18px;
     }
 
     .bracket-match {
@@ -532,7 +533,8 @@
 
     .bracket-match-header {
       display: flex;
-      justify-content: flex-start;
+      flex-direction: column;
+      align-items: flex-start;
       gap: 10px;
       padding: 10px 12px;
       border-bottom: 1px solid var(--border);
@@ -542,9 +544,15 @@
       font-weight: 800;
     }
 
+    .bracket-match-date {
+      color: #e2e8f0;
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1.3;
+    }
+
     .bracket-teams {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
 
     .bracket-team {
@@ -552,11 +560,11 @@
       grid-template-columns: 1fr auto;
       gap: 14px;
       padding: 13px 12px;
-      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
     }
 
     .bracket-team:last-child {
-      border-right: 0;
+      border-bottom: 0;
     }
 
     .bracket-team.winner {
@@ -2126,7 +2134,7 @@
       const championCode = data.bracket?.champion || "";
       const champion = championCode ? getTeam(championCode) : null;
       const championOwner = championCode ? getOwnerByTeam(championCode) : "";
-      const visibleRounds = getVisibleBracketRounds(rounds, champion ? championCode : "");
+      const bracketRounds = getBracketRoundsForBoard(rounds);
 
       if (champion) {
         container.innerHTML = `
@@ -2144,13 +2152,13 @@
 
       container.innerHTML = `
         <div class="bracket-board">
-          ${visibleRounds.map((round) => `
+          ${bracketRounds.map((round) => `
             <section class="bracket-round">
               <div class="bracket-round-title">
                 <span>${getRoundDisplayName(round.name)}</span>
               </div>
               <div class="bracket-round-content">
-                ${round.matches.map((match, index) => renderBracketMatch(match, index + 1)).join("")}
+                ${round.matches.map((match, index) => renderBracketMatch(round.name, match, index)).join("")}
               </div>
             </section>
           `).join("")}
@@ -2158,26 +2166,30 @@
       `;
     }
 
-    function getVisibleBracketRounds(rounds, championCode) {
-      if (championCode) return [];
-      const flow = ["Dieciseisavos", "Octavos", "Cuartos", "Semifinal", "Final"];
-      const latestRoundIndex = rounds.reduce((latestIndex, round) => {
-        if (!hasBracketRoundInfo(round)) return latestIndex;
-        const roundIndex = flow.indexOf(round.name);
-        return roundIndex > latestIndex ? roundIndex : latestIndex;
-      }, -1);
-
-      if (latestRoundIndex === -1) return rounds;
-      if (flow[latestRoundIndex] === "Final") return rounds.filter((round) => round.name === "Final");
-
-      return rounds.filter((round) => {
-        const roundIndex = flow.indexOf(round.name);
-        return roundIndex === -1 || roundIndex >= latestRoundIndex;
+    function getBracketRoundsForBoard(rounds) {
+      const roundsByName = new Map(rounds.map((round) => [round.name, round]));
+      return getBracketRoundDefinitions().map((definition) => {
+        const round = roundsByName.get(definition.name);
+        const matches = round?.matches || [];
+        return {
+          name: definition.name,
+          matches: Array.from({ length: definition.matchCount }, (_, index) => matches[index] || {
+            a: "",
+            b: "",
+            winner: ""
+          })
+        };
       });
     }
 
-    function hasBracketRoundInfo(round) {
-      return Array.isArray(round.matches) && round.matches.some((match) => match.a || match.b || match.winner);
+    function getBracketRoundDefinitions() {
+      return [
+        { name: "Dieciseisavos", matchCount: 16 },
+        { name: "Octavos", matchCount: 8 },
+        { name: "Cuartos", matchCount: 4 },
+        { name: "Semifinal", matchCount: 2 },
+        { name: "Final", matchCount: 1 }
+      ];
     }
 
     function getRoundDisplayName(name) {
@@ -2186,13 +2198,15 @@
       return name;
     }
 
-    function renderBracketMatch(match, index) {
+    function renderBracketMatch(roundName, match, index) {
       const teamA = getTeam(match.a);
       const teamB = getTeam(match.b);
+      const schedule = getBracketMatchSchedule(roundName, match, index);
       return `
         <article class="bracket-match">
           <div class="bracket-match-header">
-            <span>Partido ${index}</span>
+            <span>Partido ${index + 1}</span>
+            <span class="bracket-match-date">${schedule}</span>
           </div>
           <div class="bracket-teams">
             ${renderBracketTeam(teamA, match.scoreA, match.winner === match.a)}
@@ -2224,6 +2238,75 @@
           <div class="bracket-score">${score ?? ""}</div>
         </div>
       `;
+    }
+
+    function getBracketMatchSchedule(roundName, match, index) {
+      const exactKey = [match.a, match.b].filter(Boolean).sort().join("-");
+      const exactSchedule = getBracketExactMatchSchedules()[exactKey];
+      if (exactSchedule) return exactSchedule;
+
+      const schedules = getBracketRoundSchedules()[roundName] || [];
+      return schedules[index] || "Fecha por definir";
+    }
+
+    function getBracketExactMatchSchedules() {
+      return {
+        "CAN-ZAF": "Dom, Jun 28, 3:00 PM ET",
+        "MAR-NED": "Lun, Jun 29, 9:00 PM ET",
+        "GER-PAR": "Lun, Jun 29, 4:30 PM ET",
+        "FRA-SWE": "Mar, Jun 30, 5:00 PM ET",
+        "BRA-JPN": "Lun, Jun 29, 1:00 PM ET",
+        "CIV-NOR": "Mar, Jun 30, 1:00 PM ET",
+        "AUS-EGY": "Vie, Jul 3, 2:00 PM ET",
+        "ARG-CPV": "Vie, Jul 3, 6:00 PM ET",
+        "BIH-USA": "Mié, Jul 1, 8:00 PM ET"
+      };
+    }
+
+    function getBracketRoundSchedules() {
+      return {
+        Dieciseisavos: [
+          "Dom, Jun 28, 3:00 PM ET",
+          "Lun, Jun 29, 9:00 PM ET",
+          "Lun, Jun 29, 4:30 PM ET",
+          "Mar, Jun 30, 5:00 PM ET",
+          "Mié, Jul 1, 4:00 PM ET",
+          "Mié, Jul 1, 8:00 PM ET",
+          "Lun, Jun 29, 1:00 PM ET",
+          "Mar, Jun 30, 1:00 PM ET",
+          "Mar, Jun 30, 9:00 PM ET",
+          "Vie, Jul 3, 2:00 PM ET",
+          "Vie, Jul 3, 6:00 PM ET",
+          "Jue, Jul 2, 7:00 PM ET",
+          "Jue, Jul 2, 3:00 PM ET",
+          "Jue, Jul 2, 11:00 PM ET",
+          "Mié, Jul 1, 12:00 PM ET",
+          "Vie, Jul 3, 9:30 PM ET"
+        ],
+        Octavos: [
+          "Sáb, Jul 4, 5:00 PM ET",
+          "Sáb, Jul 4, 1:00 PM ET",
+          "Lun, Jul 6, 3:00 PM ET",
+          "Lun, Jul 6, 8:00 PM ET",
+          "Dom, Jul 5, 4:00 PM ET",
+          "Dom, Jul 5, 8:00 PM ET",
+          "Mar, Jul 7, 12:00 PM ET",
+          "Mar, Jul 7, 4:00 PM ET"
+        ],
+        Cuartos: [
+          "Jue, Jul 9, 4:00 PM ET",
+          "Vie, Jul 10, 3:00 PM ET",
+          "Sáb, Jul 11, 5:00 PM ET",
+          "Sáb, Jul 11, 9:00 PM ET"
+        ],
+        Semifinal: [
+          "Mar, Jul 14, 3:00 PM ET",
+          "Mié, Jul 15, 3:00 PM ET"
+        ],
+        Final: [
+          "Dom, Jul 19, 3:00 PM ET"
+        ]
+      };
     }
 
     function initDrawVideo() {
