@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sorteo Mundial 2026</title>
-  <script src="data.js?v=20260627-partido-column"></script>
-  <script src="quinielaOrdenada.js?v=20260627-partido-column"></script>
+  <script src="data.js?v=20260627-bracket-slots"></script>
+  <script src="quinielaOrdenada.js?v=20260627-bracket-slots"></script>
   <script defer src="/_vercel/insights/script.js"></script>
   <style>
     :root {
@@ -2244,31 +2244,31 @@
         return Array.from({ length: matchCount }, (_, index) => matchesByNumber.get(index + 1) || createEmptyBracketMatch(index + 1));
       }
 
-      const teams = new Set(matches.flatMap((match) => [match.a, match.b]).filter(Boolean));
       return [
-        createBracketMatchFromCodes("ZAF", "CAN", teams),
-        createBracketMatchFromCodes("NED", "MAR", teams),
-        createBracketMatchFromCodes("GER", "PAR", teams),
-        createBracketMatchFromCodes("FRA", "SWE", teams),
-        createBracketMatchFromCodes("BEL", "", teams),
-        createBracketMatchFromCodes("USA", "BIH", teams),
-        createBracketMatchFromCodes("ESP", "", teams),
+        createBracketMatchFromCodes(1, "ZAF", "CAN"),
+        createBracketMatchFromCodes(2, "NED", "MAR"),
+        createBracketMatchFromCodes(3, "GER", "PAR"),
+        createBracketMatchFromCodes(4, "FRA", "SWE"),
+        createBracketMatchFromCodes(5, "BEL", ""),
+        createBracketMatchFromCodes(6, "USA", "BIH"),
+        createBracketMatchFromCodes(7, "ESP", ""),
         createEmptyBracketMatch(8),
-        createBracketMatchFromCodes("BRA", "JPN", teams),
-        createBracketMatchFromCodes("CIV", "NOR", teams),
-        createBracketMatchFromCodes("MEX", "", teams),
+        createBracketMatchFromCodes(9, "BRA", "JPN"),
+        createBracketMatchFromCodes(10, "CIV", "NOR"),
+        createBracketMatchFromCodes(11, "MEX", ""),
         createEmptyBracketMatch(12),
-        createBracketMatchFromCodes("SUI", "", teams),
+        createBracketMatchFromCodes(13, "SUI", ""),
         createEmptyBracketMatch(14),
-        createBracketMatchFromCodes("AUS", "EGY", teams),
-        createBracketMatchFromCodes("ARG", "CPV", teams)
+        createBracketMatchFromCodes(15, "AUS", "EGY"),
+        createBracketMatchFromCodes(16, "ARG", "CPV")
       ];
     }
 
-    function createBracketMatchFromCodes(teamA, teamB, availableTeams) {
+    function createBracketMatchFromCodes(matchNumber, teamA, teamB) {
       return {
-        a: teamA && availableTeams.has(teamA) ? teamA : "",
-        b: teamB && availableTeams.has(teamB) ? teamB : "",
+        matchNumber,
+        a: teams.has(teamA) ? teamA : "",
+        b: teams.has(teamB) ? teamB : "",
         winner: ""
       };
     }
