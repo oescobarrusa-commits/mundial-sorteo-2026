@@ -2251,9 +2251,23 @@
     }
 
     function getBracketGridRow(roundName, index) {
+      const customRow = getBracketCustomGridRows()[roundName]?.[index];
+      if (customRow) return `${customRow.start} / span ${customRow.span}`;
+
       const definition = getBracketRoundDefinitions().find((round) => round.name === roundName);
       const rowSpan = definition ? 16 / definition.matchCount : 1;
       return `${index * rowSpan + 1} / span ${rowSpan}`;
+    }
+
+    function getBracketCustomGridRows() {
+      return {
+        Cuartos: [
+          { start: 1, span: 4 },
+          { start: 5, span: 2 },
+          { start: 7, span: 4 },
+          { start: 11, span: 4 }
+        ]
+      };
     }
 
     function renderBracketTeam(team, score, isWinner) {
