@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sorteo Mundial 2026</title>
-  <script src="data.js?v=20260627-tree-bracket"></script>
-  <script src="quinielaOrdenada.js?v=20260627-tree-bracket"></script>
+  <script src="data.js?v=20260627-bracket-home"></script>
+  <script src="quinielaOrdenada.js?v=20260627-bracket-home"></script>
   <script defer src="/_vercel/insights/script.js"></script>
   <style>
     :root {
@@ -1157,9 +1157,9 @@
       </div>
       <nav class="tabs" aria-label="Navegación principal">
         <button class="tab" type="button" data-screen="countries">Países</button>
-        <button class="tab active" type="button" data-screen="today">¿Quién juega hoy?</button>
+        <button class="tab" type="button" data-screen="today">¿Quién juega hoy?</button>
         <button class="tab" type="button" data-screen="participants">Participantes</button>
-        <button class="tab" type="button" data-screen="bracket">Bracket</button>
+        <button class="tab active" type="button" data-screen="bracket">Bracket</button>
         <button class="tab" type="button" data-screen="quiniela">Quiniela de los 8</button>
         <button class="tab" type="button" data-screen="draw">Sorteo</button>
       </nav>
@@ -1192,7 +1192,7 @@
       <div id="countryDetail" class="country-detail"></div>
     </section>
 
-    <section id="today" class="screen active">
+    <section id="today" class="screen">
       <div class="daily-layout">
         <aside class="panel">
           <label for="matchDateSelect">Elegir fecha</label>
@@ -1208,7 +1208,7 @@
       </div>
     </section>
 
-    <section id="bracket" class="screen">
+    <section id="bracket" class="screen active">
       <div class="completed-bracket">
         <h2>Bracket</h2>
         <p class="completed-bracket-intro">La fase de eliminación directa aparecerá aquí cuando el torneo avance.</p>
