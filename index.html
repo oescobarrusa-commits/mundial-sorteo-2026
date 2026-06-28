@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sorteo Mundial 2026</title>
-  <script src="data.js?v=20260627-excel-bracket"></script>
-  <script src="quinielaOrdenada.js?v=20260627-excel-bracket"></script>
+  <script src="data.js?v=20260627-centered-bracket"></script>
+  <script src="quinielaOrdenada.js?v=20260627-centered-bracket"></script>
   <script defer src="/_vercel/insights/script.js"></script>
   <style>
     :root {
@@ -491,6 +491,8 @@
       --connector-gap: 18px;
       --connector-color: #d1d5db;
       --connector-width: 2px;
+      --bracket-row-height: 62px;
+      --bracket-row-gap: 6px;
       display: grid;
       grid-template-columns: repeat(5, minmax(236px, 280px));
       gap: var(--connector-gap);
@@ -524,8 +526,8 @@
 
     .bracket-round-content {
       display: grid;
-      grid-template-rows: repeat(16, minmax(126px, auto));
-      gap: 12px;
+      grid-template-rows: repeat(32, minmax(var(--bracket-row-height), auto));
+      gap: var(--bracket-row-gap);
     }
 
     .bracket-match {
@@ -567,7 +569,7 @@
     .bracket-link-vertical {
       left: calc(100% + (var(--connector-gap) / 2));
       top: 50%;
-      height: calc(var(--connector-rows, 1) * 138px);
+      height: calc(var(--connector-rows, 1) * (var(--bracket-row-height) + var(--bracket-row-gap)));
       border-right: var(--connector-width) solid var(--connector-color);
     }
 
@@ -2307,7 +2309,7 @@
 
     function getBracketConnectorRows(roundName) {
       const definition = getBracketRoundDefinitions().find((round) => round.name === roundName);
-      return definition ? 16 / definition.matchCount : 1;
+      return definition ? 32 / definition.matchCount : 1;
     }
 
     function getBracketGridRow(roundName, index) {
@@ -2315,8 +2317,9 @@
       if (customRow) return `${customRow.start} / span ${customRow.span}`;
 
       const definition = getBracketRoundDefinitions().find((round) => round.name === roundName);
-      const rowSpan = definition ? 16 / definition.matchCount : 1;
-      return `${index * rowSpan + 1} / span ${rowSpan}`;
+      const halfRowSpan = definition ? 32 / definition.matchCount : 2;
+      const start = index * halfRowSpan + Math.max(1, halfRowSpan / 2);
+      return `${start} / span 2`;
     }
 
     function getBracketCustomGridRows() {
