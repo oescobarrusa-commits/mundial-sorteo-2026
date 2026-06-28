@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sorteo Mundial 2026</title>
-  <script src="data.js?v=20260627-centered-bracket"></script>
-  <script src="quinielaOrdenada.js?v=20260627-centered-bracket"></script>
+  <script src="data.js?v=20260627-tree-bracket"></script>
+  <script src="quinielaOrdenada.js?v=20260627-tree-bracket"></script>
   <script defer src="/_vercel/insights/script.js"></script>
   <style>
     :root {
@@ -491,8 +491,8 @@
       --connector-gap: 18px;
       --connector-color: #d1d5db;
       --connector-width: 2px;
-      --bracket-row-height: 62px;
-      --bracket-row-gap: 6px;
+      --bracket-card-height: 236px;
+      --bracket-row-height: calc(var(--bracket-card-height) / 4);
       display: grid;
       grid-template-columns: repeat(5, minmax(236px, 280px));
       gap: var(--connector-gap);
@@ -526,13 +526,14 @@
 
     .bracket-round-content {
       display: grid;
-      grid-template-rows: repeat(32, minmax(var(--bracket-row-height), auto));
-      gap: var(--bracket-row-gap);
+      grid-template-rows: repeat(64, var(--bracket-row-height));
+      gap: 0;
     }
 
     .bracket-match {
       align-self: center;
       position: relative;
+      min-height: var(--bracket-card-height);
       overflow: visible;
       border: 1px solid var(--border);
       border-radius: 8px;
@@ -569,7 +570,7 @@
     .bracket-link-vertical {
       left: calc(100% + (var(--connector-gap) / 2));
       top: 50%;
-      height: calc(var(--connector-rows, 1) * (var(--bracket-row-height) + var(--bracket-row-gap)));
+      height: calc(var(--connector-rows, 1) * var(--bracket-row-height));
       border-right: var(--connector-width) solid var(--connector-color);
     }
 
@@ -2309,7 +2310,7 @@
 
     function getBracketConnectorRows(roundName) {
       const definition = getBracketRoundDefinitions().find((round) => round.name === roundName);
-      return definition ? 32 / definition.matchCount : 1;
+      return definition ? 64 / definition.matchCount : 1;
     }
 
     function getBracketGridRow(roundName, index) {
@@ -2317,9 +2318,10 @@
       if (customRow) return `${customRow.start} / span ${customRow.span}`;
 
       const definition = getBracketRoundDefinitions().find((round) => round.name === roundName);
-      const halfRowSpan = definition ? 32 / definition.matchCount : 2;
-      const start = index * halfRowSpan + Math.max(1, halfRowSpan / 2);
-      return `${start} / span 2`;
+      const cardSpan = 4;
+      const blockSpan = definition ? 64 / definition.matchCount : cardSpan;
+      const start = index * blockSpan + (blockSpan / 2) - (cardSpan / 2) + 1;
+      return `${start} / span ${cardSpan}`;
     }
 
     function getBracketCustomGridRows() {
